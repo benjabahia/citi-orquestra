@@ -5,6 +5,7 @@ Ferramenta principal: Claude (Anthropic), usado para escrever o código; o Benja
 | Dia | Objetivo | O que a IA propôs | Aceito / corrigido / recusado |
 |---|---|---|---|
 | Dom | Escolher a ideia e fechar decisões de produto | Brainstorming e entrevista de 31 perguntas | Benja escolheu a ideia e aceitou/ajustou cada decisão |
+| Dom | API FastAPI (projetos, squads, substitutos, aplicar troca) | Endpoints e 5 testes | Aceito após revisão |
 | Dom | Núcleo em Python: dados, pontuação, alocação, trocas | Código inicial e testes | Corrigido várias vezes (ver abaixo) |
 
 ## Onde a IA errou e como foi corrigido
@@ -16,4 +17,4 @@ Ferramenta principal: Claude (Anthropic), usado para escrever o código; o Benja
 6. Substitutos sem nenhum nível na habilidade eram sugeridos → filtro de nível mínimo 1.
 
 ## Testes
-13 testes de cenário em `backend/tests/test_scenarios.py` (todos passando).
+13 testes de cenário (`test_scenarios.py`) e 5 testes da API (`test_api.py`), todos passando.
