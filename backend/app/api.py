@@ -22,6 +22,7 @@ from .ai import briefing as briefing_ai
 from .ai import llm
 from .ai import profile_chat
 from .data import default_availability, load_scenario
+from .members_csv import parse_members_csv, template_csv
 from .models import Member, Project, Role
 from .recommend import recommend_all
 from .serializers import (
@@ -79,6 +80,10 @@ class CustomProjectRequest(BaseModel):
     duration_weeks: int = Field(ge=1, le=26)
     roles: list[RoleIn] = Field(min_length=3, max_length=6)
     extra_members: list[MemberProfileIn] = []
+    replace_members: Optional[list[MemberProfileIn]] = Field(
+        None, min_length=3, max_length=200,
+        description="planilha do gerente: quando preenchida, substitui os 24 membros de exemplo",
+    )
 
 
 def _slug(text: str) -> str:
@@ -91,12 +96,16 @@ def _custom_context(req: CustomProjectRequest):
     for r in req.roles:
         if r.skill not in SKILL_LABELS:
             raise HTTPException(422, f"Habilidade '{r.skill}' não existe.")
-    members = dict(MEMBERS)
+    sheet = req.replace_members is not None
+    members = {} if sheet else dict(MEMBERS)
     extras = []
-    for i, m in enumerate(req.extra_members):
+    news = [("imp", m) for m in (req.replace_members or [])] + [("novo", m) for m in req.extra_members]
+    counters = {"imp": 0, "novo": 0}
+    for prefix, m in news:
         if any(sk not in SKILL_LABELS or not 0 <= v <= 4 for sk, v in m.skills.items()):
             raise HTTPException(422, "Perfil com habilidade ou nível inválido.")
-        member = Member(f"novo{i + 1}", m.name, m.months_in_citi, dict(m.skills), tuple(m.learning_goals))
+        counters[prefix] += 1
+        member = Member(f"{prefix}{counters[prefix]}", m.name, m.months_in_citi, dict(m.skills), tuple(m.learning_goals))
         members[member.id] = member
         extras.append(member.id)
     top = next((i for i, r in enumerate(req.roles) if r.critical), None)
@@ -106,7 +115,7 @@ def _custom_context(req: CustomProjectRequest):
         for i, r in enumerate(req.roles)
     )
     project = Project(f"custom-{_slug(req.name)}", req.name, req.description, req.duration_weeks, roles)
-    return project, members, default_availability(project, extras)
+    return project, members, default_availability(project, extras, only_extras=sheet)
 
 
 def _context(project_id: str, custom: Optional[CustomProjectRequest]):
@@ -255,6 +264,21 @@ def build_custom(req: CustomProjectRequest):
     """Monta as 3 squads para um projeto novo (papéis vindos do briefing, já editados)."""
     project, members, availability = _custom_context(req)
     return _squads_payload(project, build_squads(project, members, availability, CFG), members)
+
+
+class ImportRequest(BaseModel):
+    text: str = Field(max_length=300_000)
+
+
+@app.post("/api/members/import")
+def import_members(req: ImportRequest):
+    """Valida a planilha (CSV) de membros. Não guarda nada: o site guarda no navegador."""
+    return parse_members_csv(req.text)
+
+
+@app.get("/api/members/template")
+def members_template():
+    return {"csv": template_csv()}
 
 
 @app.get("/api/profile/questions")

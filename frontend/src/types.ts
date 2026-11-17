@@ -70,6 +70,20 @@ export interface CustomBody {
   duration_weeks: number;
   roles: Pick<Role, "skill" | "min_level" | "hours_per_week" | "critical">[];
   extra_members: Profile[];
+  replace_members?: Profile[] | null;
+}
+
+export interface ImportError {
+  line: number | null;
+  column: string | null;
+  message: string;
+}
+
+export interface ImportResult {
+  ok: boolean;
+  members: Profile[];
+  errors: ImportError[];
+  more_errors: number;
 }
 
 export interface Metrics {

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
+import ImportSheet, { loadSheet, saveSheet } from "./ImportSheet";
 import SquadBoard from "./SquadBoard";
 import SquadDetail from "./SquadDetail";
 import type { CustomBody, Meta, Mode, Priority, Profile, Project, Role, Squad, SquadsResponse } from "./types";
@@ -36,6 +37,14 @@ export default function Manager({ meta }: { meta: Meta }) {
   const rolesRef = useRef<HTMLElement>(null);
   const resultRef = useRef<HTMLElement>(null);
   const saved = loadSavedMembers();
+  const [sheet, setSheet] = useState<Profile[] | null>(loadSheet);
+
+  // Trocar ou remover a planilha invalida o resultado que está na tela (ele usava a equipe antiga).
+  const changeSheet = (members: Profile[] | null) => {
+    saveSheet(members);
+    setSheet(members);
+    if (custom) { setResult(null); setDetail(null); setCustom(null); setPriority(null); }
+  };
 
   // Leva a tela até o que acabou de aparecer (antes o resultado ficava fora da vista).
   const reduceMotion =
@@ -93,6 +102,7 @@ export default function Manager({ meta }: { meta: Meta }) {
           skill, min_level, hours_per_week, critical,
         })),
         extra_members: saved,
+        replace_members: sheet,
       };
       setCustom(body);
       setDetail(null);
@@ -231,6 +241,7 @@ export default function Manager({ meta }: { meta: Meta }) {
             <button className="ghost" disabled={roles.length >= 6} onClick={addRole}>Adicionar papel</button>
             <button className="primary" disabled={busy} onClick={build}>{busy ? "Montando..." : "Montar squads"}</button>
           </div>
+          <ImportSheet members={sheet} onChange={changeSheet} />
           {saved.length > 0 && (
             <p className="muted small">
               {saved.length} membro(s) que responderam o chat entram no sorteio: {saved.map((m) => m.name).join(", ")}.

@@ -1,4 +1,4 @@
-import type { CustomBody, Meta, Mode, Profile, Project, Question, Role, Squad, SquadsResponse, StressResponse, Substitute } from "./types";
+import type { CustomBody, ImportResult, Meta, Mode, Profile, Project, Question, Role, Squad, SquadsResponse, StressResponse, Substitute } from "./types";
 
 async function call<T>(path: string, body?: unknown): Promise<T> {
   // Se o servidor não responder em 25 s, avisa em vez de deixar a tela esperando para sempre.
@@ -47,6 +47,8 @@ export const api = {
     projectId: string,
     body: { profile: string; assignments: (string | null)[]; role_index: number; custom: CustomBody | null; member_id: string | null },
   ) => call<{ squad: Squad }>(`/api/projects/${projectId}/apply`, body),
+  importMembers: (text: string) => call<ImportResult>("/api/members/import", { text }),
+  membersTemplate: () => call<{ csv: string }>("/api/members/template"),
   questions: () => call<{ questions: Question[] }>("/api/profile/questions"),
   interpret: (name: string, answers: unknown) =>
     call<{
