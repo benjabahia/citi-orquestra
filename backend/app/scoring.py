@@ -85,7 +85,7 @@ def assign_mentors(project, assignments, members, availability, cfg: Config = DE
 def evaluate(project: Project, assignments, members, availability, cfg: Config = DEFAULT_CONFIG) -> Metrics:
     """Calcula os 3 medidores (0 a 100) de uma squad.
 
-    - entrega     = cobertura das habilidades x folga de horas
+    - entrega     = cobertura das habilidades x folga de horas, menos o tempo gasto em mentoria
     - crescimento = meta de aprendizado atendida + apoio de mentor
     - risco       = soma de penalidades (cada uma vira um `Factor` explicado)
     """
@@ -128,7 +128,10 @@ def evaluate(project: Project, assignments, members, availability, cfg: Config =
 
         # --- Cobertura: com mentor, o nível efetivo sobe 1 ---
         effective_level = level + (cfg.mentor_level_boost if mentored else 0)
-        cov = 1.0 if role.min_level <= 0 else min(1.0, effective_level / role.min_level)
+        # Na ENTREGA a ajuda do mentor vale menos: novato com mentor ainda rende menos
+        # do que um veterano. No RISCO (abaixo) ela conta o nível inteiro.
+        delivery_level = level + (cfg.mentor_delivery_boost if mentored else 0)
+        cov = 1.0 if role.min_level <= 0 else min(1.0, delivery_level / role.min_level)
         coverage.append(cov)
         gap = max(0, role.min_level - effective_level)
         if gap > 0:
@@ -218,7 +221,8 @@ def evaluate(project: Project, assignments, members, availability, cfg: Config =
     wsum = sum(weights) or 1.0
     cov_avg = sum(w * c for w, c in zip(weights, coverage)) / wsum
     hours_avg = sum(w * h for w, h in zip(weights, hours_factor)) / wsum
-    entrega = 100.0 * cov_avg * hours_avg
+    entrega = 100.0 * cov_avg * hours_avg - cfg.mentoring_delivery_cost * len(mentorships)
+    entrega = max(0.0, entrega)
     crescimento = 100.0 * sum(growth) / len(roles)
     risco = min(100.0, sum(f.points for f in factors))
 

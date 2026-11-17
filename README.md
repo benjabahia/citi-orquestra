@@ -1,8 +1,17 @@
-# CITi Orquestra
+<p align="center">
+  <img src="assets/logo.png" alt="Logo CITi Orquestra" width="260">
+</p>
+
+<h1 align="center">CITi Orquestra</h1>
+
+<p align="center"><b>Monte o squad certo e veja o impacto antes de decidir.</b></p>
 
 Ferramenta interna do CITi que monta 3 squads por projeto (Segura, Evolutiva e Balanceada) a partir das habilidades e da disponibilidade dos membros, e mostra o impacto de cada troca de pessoa antes da decisão.
 
-> Status: núcleo, API, briefing, chat de perfil, comparação das squads, tela de detalhes com gráficos e simulação de troca prontos (34 testes). Falta o deploy.
+**Site no ar:** https://citi-orquestra.onrender.com
+**Uso de IA no desenvolvimento:** [AI_LOG.md](AI_LOG.md)
+
+> Status: site publicado e em refinamento. A documentação final e o link do vídeo entram ao fim do projeto.
 
 ## Como o núcleo funciona
 - **O algoritmo decide, a IA só interpreta e explica.** Pontuação + restrições + busca local (hill climbing).

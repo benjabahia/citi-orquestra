@@ -120,6 +120,29 @@ def test_cada_tipo_de_squad_faz_o_que_promete(all_squads):
         assert evo.crescimento >= seg.crescimento, project_id
 
 
+def test_as_tres_squads_formam_uma_escada_clara(all_squads):
+    """Entrega cai de Segura a Evolutiva e crescimento sobe, sem empate entre os tipos."""
+    for project_id, squads in all_squads.items():
+        seg, bal, evo = (squads[k].metrics for k in ("segura", "balanceada", "evolutiva"))
+        assert seg.entrega > bal.entrega > evo.entrega, project_id
+        assert seg.crescimento < bal.crescimento < evo.crescimento, project_id
+        assert seg.risco <= bal.risco <= evo.risco, project_id
+
+
+def test_evolutiva_leva_mais_novatos_que_a_balanceada(all_squads, members):
+    """Evolutiva: pelo menos 2 novatos; Balanceada: exatamente 1; Segura: nenhum."""
+    for project_id, squads in all_squads.items():
+        assert len(_novatos(squads["evolutiva"], members)) >= 2, project_id
+        assert len(_novatos(squads["balanceada"], members)) == 1, project_id
+        assert len(_novatos(squads["segura"], members)) == 0, project_id
+
+
+def test_novato_com_mentor_nao_rende_como_veterano():
+    """A entrega considera que quem aprende com mentor ainda rende menos."""
+    from app.config import DEFAULT_CONFIG as C
+    assert C.mentor_delivery_boost < C.mentor_level_boost
+
+
 # 9 ---------------------------------------------------------------------------
 def test_projeto_armadilha_tirar_a_unica_referencia_de_backend_dispara_o_risco(
     scenario, members, all_squads

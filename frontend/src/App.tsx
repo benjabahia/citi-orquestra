@@ -22,7 +22,7 @@ export default function App() {
       <header className="nav-wrap">
         <nav className="nav" aria-label="Principal">
           <span className="brand">
-            <span className="mark" aria-hidden="true" />
+            <img className="mark" src="/logo-nav.png" alt="" width="42" height="42" />
             CITi <span className="light">Orquestra</span>
           </span>
           <div className="tabs" role="tablist" aria-label="Perfil de uso">

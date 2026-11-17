@@ -50,7 +50,10 @@ class Config:
     mentor_min_level: int = 3           # nível mínimo na habilidade para ser mentor
     max_mentees_per_mentor: int = 2     # cada mentor atende no máximo 2 pessoas
     mentoring_hours_per_mentee: float = 2.0  # horas/semana que a mentoria consome
-    mentor_level_boost: int = 1         # com mentor, o nível efetivo sobe 1
+    mentor_level_boost: int = 1         # com mentor, o nível efetivo sobe 1 (ao medir o RISCO)
+    mentor_delivery_boost: float = 0.5  # ...mas na ENTREGA a ajuda do mentor vale só meio nível
+    mentoring_delivery_cost: float = 2.0  # pontos de entrega perdidos por pessoa mentorada (tempo do mentor)
+    evolutiva_min_novatos: int = 2      # a Evolutiva leva pelo menos 2 novatos (ou metade dos papéis, se for maior)
 
     # --- Cobertura ---
     backup_min_level: int = 2           # nível mínimo para "cobrir" uma habilidade
@@ -84,7 +87,7 @@ class ProfileWeights:
 
 
 PROFILE_WEIGHTS = {
-    "segura": ProfileWeights(entrega=0.60, crescimento=0.05, risco=0.35),
+    "segura": ProfileWeights(entrega=0.60, crescimento=0.0, risco=0.40),
     "evolutiva": ProfileWeights(entrega=0.30, crescimento=0.45, risco=0.25),
-    "balanceada": ProfileWeights(entrega=0.45, crescimento=0.25, risco=0.30),
+    "balanceada": ProfileWeights(entrega=0.40, crescimento=0.35, risco=0.25),
 }

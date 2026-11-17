@@ -9,7 +9,7 @@ Como funciona (decisão Q3: quem decide é o ALGORITMO, não o LLM):
 3. Regras duras por tipo de squad (para as 3 opções serem realmente diferentes):
    - Segura:     nenhum novato.
    - Balanceada: exatamente 1 novato (se houver novato disponível).
-   - Evolutiva:  pelo menos 1 novato a cada 3 papéis (a busca pode escolher mais), com mentor.
+   - Evolutiva:  pelo menos 2 novatos (ou metade dos papéis), sempre com mentor.
 4. As 3 squads precisam ter pessoas diferentes entre si (nunca saem repetidas).
 
 O resultado é determinístico: mesma entrada e mesma `seed` dão a mesma squad.
@@ -73,7 +73,7 @@ def build_squad(
     notes = []
 
     novatos_in_pool = [m for m in pool if members[m].is_novato(cfg.novato_months)]
-    min_novatos = min(max(1, n // 3), len(novatos_in_pool))
+    min_novatos = min(max(cfg.evolutiva_min_novatos, n // 2), len(novatos_in_pool))
 
     def count_novatos(state):
         return sum(1 for s in state if s is not None and members[s].is_novato(cfg.novato_months))
