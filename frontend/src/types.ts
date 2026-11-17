@@ -189,3 +189,12 @@ export interface CoherenceWarning {
   skill: string | null;
   message: string;
 }
+
+export interface SummaryBody {
+  project_id: string;
+  profile: string;
+  assignments: (string | null)[];
+  custom: CustomBody | null;
+  /** true quando o teste de estresse já foi feito: o resumo inclui o ponto mais frágil. */
+  include_weakest: boolean;
+}

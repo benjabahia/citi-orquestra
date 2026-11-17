@@ -1,4 +1,4 @@
-import type { ChatMessage, CoherenceWarning, CustomBody, DraftSkill, ImportResult, Meta, Mode, Profile, Project, Question, Role, Squad, SquadsResponse, StressResponse, Substitute, TeamMember } from "./types";
+import type { ChatMessage, CoherenceWarning, CustomBody, DraftSkill, ImportResult, Meta, Mode, Profile, Project, Question, Role, Squad, SquadsResponse, StressResponse, SummaryBody, Substitute, TeamMember } from "./types";
 
 async function call<T>(path: string, body?: unknown, timeoutMs = 25000): Promise<T> {
   // Se o servidor não responder a tempo (padrão: 25 s), avisa em vez de deixar a tela esperando para sempre.
@@ -48,6 +48,7 @@ export const api = {
     projectId: string,
     body: { profile: string; assignments: (string | null)[]; role_index: number; custom: CustomBody | null; member_id: string | null },
   ) => call<{ squad: Squad }>(`/api/projects/${projectId}/apply`, body),
+  summary: (body: SummaryBody) => call<{ text: string }>("/api/export/summary", body),
   importMembers: (text: string) => call<ImportResult>("/api/members/import", { text }),
   membersTemplate: () => call<{ csv: string }>("/api/members/template"),
   questions: () => call<{ questions: Question[] }>("/api/profile/questions"),

@@ -25,7 +25,7 @@ Ferramenta interna do CITi que monta **3 squads por projeto** (Segura, Evolutiva
 7. [Testes](#testes)
 8. [Publicação](#publicação)
 9. [Estrutura do repositório](#estrutura-do-repositório)
-10. [Limites conhecidos e próximos passos](#limites-conhecidos-e-próximos-passos)
+10. [Limites conhecidos](#limites-conhecidos)
 
 ---
 
@@ -57,6 +57,7 @@ O CITi Orquestra transforma essa decisão em algo visível e comparável. A regr
 | 11 | [Projetos prontos](#11-projetos-prontos-e-o-projeto-armadilha) | 6 exemplos, incluindo um "armadilha" que mostra o risco aparecendo |
 | 12 | [IA real ou simulada](#12-ia-real-ou-simulada-sempre-visível) | O modo ativo aparece na tela; sem IA, tudo continua funcionando |
 | 13 | [Disponibilidade real de horas](#13-disponibilidade-real-de-horas) | Horas livres declaradas pelos membros, ajustáveis pelo gerente e comparadas com as exigidas |
+| 14 | [Exportar o resultado](#14-exportar-o-resultado) | PDF da squad e resumo curto para colar no WhatsApp ou no Slack |
 
 ### 1. Três squads por projeto
 
@@ -184,6 +185,25 @@ Em projetos criados por briefing, as horas livres de cada pessoa vêm do que foi
 - Na tabela comparativa e na tela de detalhes, cada pessoa mostra "4 h livres · 6 h exigidas". Quando faltam horas, aparece uma etiqueta vermelha suave "faltam 2 h", e o cartão da squad mostra um resumo como "2 pessoas sem horas suficientes".
 - Texto fixo: "Disponibilidade declarada pelos membros; o sistema não verifica as horas."
 
+### 14. Exportar o resultado
+
+Duas formas de levar a squad para fora da ferramenta. As duas mostram o estado **atual** da squad, inclusive as trocas já aplicadas.
+
+**PDF da squad.** O botão **Baixar PDF** aparece na tela de detalhes e também em cada cartão da tabela comparativa. Ele abre a caixa de impressão do navegador: escolha **Salvar como PDF**. Não usa biblioteca nova: é uma visão de relatório própria, em página A4, com fundo branco e texto escuro (mesmo com o site no tema escuro), e as barras e cores saem no arquivo. Conteúdo, nesta ordem:
+1. cabeçalho com a logo, o nome do projeto, o tipo da squad, a duração em semanas e a data de hoje;
+2. os três medidores (Entrega, Crescimento e Risco);
+3. mini-tabela comparando as três squads, com a atual destacada e o selo **Recomendada** (com a prioridade escolhida, como "Prazo apertado") quando a pessoa tiver clicado numa prioridade;
+4. tabela de pessoas: papel, pessoa, nível e "X h livres · Y h exigidas", com a marca "faltam X h" quando falta tempo;
+5. mentorias (quem ensina quem, em qual habilidade);
+6. alertas de risco;
+7. rodapé: "Disponibilidade declarada pelos membros; o sistema não verifica as horas" (projetos por briefing) ou "Dados e horas de exemplo (fictícios)" (projetos prontos).
+
+Menu, botões e tudo que não é relatório ficam de fora, e as linhas de tabela não são cortadas no meio da página.
+
+**Resumo para colar no chat.** O botão **Copiar resumo** (tela de detalhes) copia um texto curto, legível no WhatsApp e no Slack: projeto, tipo da squad, os três medidores, a lista "Papel: Pessoa (nível, X h livres · Y h exigidas)", as mentorias, o **ponto mais frágil** (só se o teste de estresse já tiver sido feito) e o aviso de disponibilidade. Aparece "Resumo copiado" por 3 segundos; se o navegador bloquear a área de transferência, a tela explica o problema e mostra o texto para copiar à mão.
+
+O texto é montado no servidor, por uma função Python pura (`backend/app/summary.py`, endpoint `POST /api/export/summary`, que recebe o mesmo corpo do teste de estresse mais o id do projeto), então é idêntico em projetos prontos e em projetos por briefing, e é testado sem navegador. Sem IA: os números vêm dos mesmos medidores da tela.
+
 ---
 
 ## Como a IA é usada
@@ -256,7 +276,7 @@ npm run build
 
 ## Testes
 
-**169 testes automatizados**, todos passando, que rodam sem internet e sem chave de IA:
+**186 testes automatizados**, todos passando, que rodam sem internet e sem chave de IA:
 
 ```
 cd backend
@@ -272,6 +292,7 @@ python -m pytest -q
 | Recomendação | recomendação esperada nos 6 projetos para cada prioridade; números citados corretos; empate; trava de risco |
 | Teste de estresse | pessoa única de habilidade crítica aparece como mais frágil; cobre todos os membros; funciona em projeto por briefing |
 | Importar planilha | arquivo válido; cada tipo de erro (nível, nome repetido ou vazio, habilidade, poucos membros, limite de linhas); projetos prontos não mudam |
+| Exportar resultado | resumo com todos os papéis e pessoas; números iguais aos medidores; marca de falta de horas; horas livres e exigidas; mentorias; ponto mais frágil só com o teste de estresse; vaga em aberto; estado atual depois de uma troca; projeto pronto e projeto por briefing com planilha; pedido inválido devolve 422 |
 | Disponibilidade de horas | perfil com e sem os campos novos; CSV com e sem as colunas novas e cada erro de horas (negativo, texto, acima do limite, decimal em semanas); horas informadas entram no cálculo; sobrecarga quando faltam horas; ajuste do gerente; troca, aplicar troca e teste de estresse com as mesmas horas; 2 semanas com 1 fora = 50%; os 6 projetos prontos idênticos aos de antes |
 
 Além dos testes automáticos, o site foi percorrido de ponta a ponta no navegador a cada mudança visual.
@@ -302,6 +323,7 @@ backend/
     whatif.py          trocas e remoções
     recommend.py       recomendação por prioridade
     stress.py          teste de estresse
+    summary.py         resumo da squad para colar no chat
     members_csv.py     leitura e validação da planilha (inclui as horas)
     data.py            membros e projetos de exemplo
     api.py             endpoints FastAPI
@@ -318,7 +340,7 @@ AI_LOG.md              diário de uso de IA no desenvolvimento
 
 ---
 
-## Limites conhecidos e próximos passos
+## Limites conhecidos
 
 **Limites**
 - Os 24 membros e 6 projetos de exemplo são fictícios.
@@ -328,9 +350,3 @@ AI_LOG.md              diário de uso de IA no desenvolvimento
 - "Balanceada com exatamente 1 novato", "Evolutiva com pelo menos 2" e o peso 1,5 dos papéis críticos são **escolhas de produto**, ajustáveis em `config.py`.
 - No plano gratuito, o primeiro acesso após muito tempo parado pode levar cerca de 1 minuto; o monitor reduz isso.
 - O visual usa a fonte Inter Tight como substituta, e a logo é própria do projeto.
-
-**Próximos passos**
-- Habilidades novas criadas pelo gerente, com marcação de quem as domina.
-- Integração com dados reais do CITi (planilha ou banco) e histórico de projetos.
-- Alocação de vários projetos ao mesmo tempo, mostrando conflitos de carga.
-- Exportar o resultado (PDF ou resumo para colar em chat).

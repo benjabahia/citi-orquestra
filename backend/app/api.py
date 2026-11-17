@@ -33,6 +33,7 @@ from .serializers import (
     substitute_dict,
 )
 from .stress import stress_test, weakest_sentence
+from .summary import build_summary
 from .whatif import _squad_from, apply_substitution, rank_substitutes, remove_member
 
 CFG = DEFAULT_CONFIG
@@ -251,6 +252,32 @@ def stress(project_id: str, req: StressRequest):
     squad = _rebuild(project, req, members, availability)
     rows = stress_test(project, squad, members, availability, CFG)
     return {"results": rows, "weakest_sentence": weakest_sentence(rows)}
+
+
+class SummaryRequest(StressRequest):
+    """Mesmo corpo do teste de estresse, mais o id do projeto (já que aqui ele não vem na URL)."""
+
+    project_id: str = Field("custom", max_length=80)
+    include_weakest: bool = Field(
+        False, description="true quando o teste de estresse já foi feito: inclui o ponto mais frágil"
+    )
+
+
+@app.post("/api/export/summary")
+def export_summary(req: SummaryRequest):
+    """Texto curto da squad atual para colar no chat. Pedido inválido: 422."""
+    if req.custom is None:
+        try:
+            SCENARIO.project(req.project_id)
+        except KeyError:
+            raise HTTPException(422, f"Projeto '{req.project_id}' não existe.")
+    project, members, availability = _context(req.project_id, req.custom)
+    squad = _rebuild(project, req, members, availability)
+    weakest = None
+    if req.include_weakest:
+        weakest = weakest_sentence(stress_test(project, squad, members, availability, CFG))
+    text = build_summary(project, squad, members, CFG, custom=req.custom is not None, weakest=weakest)
+    return {"text": text}
 
 
 @app.post("/api/projects/{project_id}/apply")

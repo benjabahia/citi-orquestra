@@ -179,6 +179,7 @@ export default function Manager({ meta }: { meta: Meta }) {
         data={result}
         profile={detail}
         custom={custom}
+        recommendation={priority ? result.recommendations?.[priority] ?? null : null}
         onBack={() => { setDetail(null); setTimeout(() => window.scrollTo({ top: 0 }), 0); }}
       />
     );
@@ -380,6 +381,7 @@ export default function Manager({ meta }: { meta: Meta }) {
             data={result}
             priority={priority}
             onPriority={setPriority}
+            custom={custom !== null}
             onDetail={(p) => { setDetail(p); window.scrollTo({ top: 0 }); }}
           />
         </section>

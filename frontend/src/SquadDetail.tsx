@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { api } from "./api";
 import { MentorGraph, Radar } from "./charts";
 import { Bar, Delta, HOURS_HELP, HoursLine, LevelBar, num, riskTone, shortOfHours, useTween } from "./ui";
-import type { CustomBody, Squad, SquadsResponse, StressResponse, Substitute } from "./types";
+import { ReportButton } from "./Report";
+import type { CustomBody, Recommendation, Squad, SquadsResponse, StressResponse, Substitute } from "./types";
 
 const TITLES: Record<Squad["profile"], string> = { segura: "Segura", evolutiva: "Evolutiva", balanceada: "Balanceada" };
 
@@ -29,8 +30,9 @@ function BigMeter({ label, hint, value, base, kind }: {
   );
 }
 
-export default function SquadDetail({ data, profile, custom, onBack }: {
-  data: SquadsResponse; profile: Squad["profile"]; custom: CustomBody | null; onBack: () => void;
+export default function SquadDetail({ data, profile, custom, recommendation, onBack }: {
+  data: SquadsResponse; profile: Squad["profile"]; custom: CustomBody | null;
+  recommendation: Recommendation | null; onBack: () => void;
 }) {
   const baseline = data.squads[profile];
   const [squad, setSquad] = useState<Squad>(baseline);
@@ -41,6 +43,11 @@ export default function SquadDetail({ data, profile, custom, onBack }: {
   const [error, setError] = useState("");
   const [changes, setChanges] = useState(0);
   const [stress, setStress] = useState<StressResponse | null>(null);
+
+  // Resumo para colar no chat: aviso de "copiado" por 3 s ou, se o navegador bloquear, o texto para copiar à mão.
+  const [copied, setCopied] = useState(false);
+  const [copyFallback, setCopyFallback] = useState<string | null>(null);
+  const copiedTimer = useRef<number | undefined>(undefined);
 
   const projectId = custom ? "custom" : data.project.id;
   const m = squad.metrics;
@@ -81,6 +88,24 @@ export default function SquadDetail({ data, profile, custom, onBack }: {
       setStress(await api.stress(projectId, { profile, assignments: squad.assignments, custom }));
     });
 
+  const copySummary = () =>
+    guard(async () => {
+      setCopied(false);
+      setCopyFallback(null);
+      // O texto é montado no servidor (igual em todos os caminhos). O ponto mais frágil só entra se o teste já foi feito.
+      const r = await api.summary({
+        project_id: projectId, profile, assignments: squad.assignments, custom, include_weakest: stress !== null,
+      });
+      try {
+        await navigator.clipboard.writeText(r.text);
+        setCopied(true);
+        window.clearTimeout(copiedTimer.current);
+        copiedTimer.current = window.setTimeout(() => setCopied(false), 3000);
+      } catch {
+        setCopyFallback(r.text);
+      }
+    });
+
   const reset = () => { setSquad(baseline); setRole(null); setSubs(null); setChanges(0); setError(""); setStress(null); };
   const loadOf = (id: string | null) => m.loads.find((l) => l.member_id === id);
   const scale = Math.max(1, ...m.loads.map((l) => Math.max(l.capacity, l.demand)));
@@ -95,8 +120,21 @@ export default function SquadDetail({ data, profile, custom, onBack }: {
           <h2>Squad {TITLES[profile]}</h2>
           <p className="muted">{data.project.name} · {data.project.duration_weeks} semanas</p>
         </div>
-        <button className="btn" onClick={reset} disabled={changes === 0}>Voltar à sugestão</button>
+        <div className="head-actions">
+          <ReportButton project={data.project} profile={profile} squads={{ ...data.squads, [profile]: squad }}
+            recommendation={recommendation} custom={custom !== null} />
+          <button className="btn" onClick={copySummary} disabled={busy}>Copiar resumo</button>
+          <button className="btn" onClick={reset} disabled={changes === 0}>Voltar à sugestão</button>
+        </div>
       </div>
+      <p className="sr" role="status">{copied ? "Resumo copiado" : ""}</p>
+      {copied && <p className="copy-ok" aria-hidden="true">Resumo copiado</p>}
+      {copyFallback !== null && (
+        <div className="copy-fail" role="alert">
+          Não consegui copiar sozinho: o navegador bloqueou o acesso à área de transferência. Selecione o texto abaixo e copie com Ctrl+C.
+          <textarea readOnly value={copyFallback} onFocus={(e) => e.currentTarget.select()} aria-label="Resumo da squad" />
+        </div>
+      )}
 
       <section className="meters" aria-label="Medidores da squad">
         <BigMeter label="Entrega" hint="quanto maior, melhor" value={m.entrega} base={baseline.metrics.entrega} kind="good" />

@@ -1,4 +1,5 @@
 import { Bar, HOURS_HELP, HoursLine, LevelBar, riskTone, shortOfHours } from "./ui";
+import { ReportButton } from "./Report";
 import type { Priority, Squad, SquadsResponse } from "./types";
 
 type Key = Squad["profile"];
@@ -22,11 +23,12 @@ const PRIORITIES: { key: Priority; label: string }[] = [
 ];
 
 /** Tabela comparativa: as três squads lado a lado, com as linhas alinhadas por papel. */
-export default function SquadBoard({ data, onDetail, priority, onPriority }: {
+export default function SquadBoard({ data, onDetail, priority, onPriority, custom }: {
   data: SquadsResponse;
   onDetail: (p: Key) => void;
   priority: Priority | null;
   onPriority: (p: Priority | null) => void;
+  custom: boolean;
 }) {
   const roles = data.project.roles;
   const rec = priority ? data.recommendations?.[priority] : undefined;
@@ -67,7 +69,11 @@ export default function SquadBoard({ data, onDetail, priority, onPriority }: {
                     </p>
                   );
                 })()}
-                <button className="btn" onClick={() => onDetail(p.key)}>Ver detalhes</button>
+                <div className="card-actions">
+                  <button className="btn" onClick={() => onDetail(p.key)}>Ver detalhes</button>
+                  <ReportButton project={data.project} profile={p.key} squads={data.squads}
+                    recommendation={rec ?? null} custom={custom} />
+                </div>
               </th>
             ))}
           </tr>
