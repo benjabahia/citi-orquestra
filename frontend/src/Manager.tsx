@@ -73,6 +73,7 @@ export default function Manager({ meta }: { meta: Meta }) {
     run(async () => {
       const r = await api.parseBriefing(briefing);
       setRoles(r.roles);
+      if (r.name && !name.trim()) setName(r.name);
       setWeeks(r.duration_weeks);
       setParseMode(r.mode);
       setOpenId(null);

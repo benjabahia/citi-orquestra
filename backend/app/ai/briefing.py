@@ -66,12 +66,13 @@ def parse_simulated(text: str) -> dict:
                 reason=f"O briefing cita {SKILL_LABELS[skill]} {n}x." if n else "Papel básico de qualquer projeto.",
             )
         )
-    return {"duration_weeks": _duration(text), "roles": roles}
+    return {"name": "", "duration_weeks": _duration(text), "roles": roles}
 
 
 SYSTEM_PROMPT = f"""Você ajuda a montar equipes de projetos de software em uma empresa júnior.
-Leia o briefing e proponha de 3 a 6 papéis. Responda SOMENTE com JSON no formato:
-{{"duration_weeks": <inteiro>, "roles": [{{"skill": <uma de {list(SKILLS)}>,
+Leia o briefing e proponha um nome curto para o projeto (até 5 palavras) e de 3 a 6 papéis.
+Responda SOMENTE com JSON no formato:
+{{"name": "<nome curto do projeto>", "duration_weeks": <inteiro>, "roles": [{{"skill": <uma de {list(SKILLS)}>,
 "min_level": <1 a 4>, "hours_per_week": <número de 2 a 12>, "critical": <true/false>,
 "reason": "<uma frase curta em português>"}}]}}
 Marque como critical no máximo 1 papel: aquele sem o qual o projeto trava."""
@@ -105,7 +106,8 @@ def _validate(data):
                     r["critical"] = False
                 first = first and not r["critical"]
         weeks = min(26, max(1, int(data.get("duration_weeks", 6))))
-        return {"duration_weeks": weeks, "roles": roles}
+        name = " ".join(str(data.get("name", "")).split())[:60]
+        return {"name": name, "duration_weeks": weeks, "roles": roles}
     except (KeyError, TypeError, ValueError):
         return None
 

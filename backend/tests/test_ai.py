@@ -37,7 +37,7 @@ def test_briefing_curto_ainda_gera_o_minimo_de_papeis():
 
 def test_resposta_da_ia_real_e_validada(monkeypatch):
     """Se a IA responde no formato certo, o modo vira 'ia_real'."""
-    boa = {"duration_weeks": 5, "roles": [
+    boa = {"name": "  App   da clínica  ", "duration_weeks": 5, "roles": [
         {"skill": "backend", "min_level": 3, "hours_per_week": 8, "critical": True, "reason": "API"},
         {"skill": "frontend", "min_level": 2, "hours_per_week": 6, "critical": False, "reason": "Telas"},
         {"skill": "qa", "min_level": 2, "hours_per_week": 4, "critical": False, "reason": "Testes"},
@@ -45,12 +45,14 @@ def test_resposta_da_ia_real_e_validada(monkeypatch):
     monkeypatch.setattr(llm, "ask_json", lambda system, user: boa)
     r = briefing.parse_briefing(BRIEFING)
     assert r["mode"] == "ia_real" and r["duration_weeks"] == 5
+    assert r["name"] == "App da clínica"  # espaços extras são limpos
 
 
 def test_resposta_ruim_da_ia_cai_no_simulado(monkeypatch):
     """Se a IA inventa habilidade ou manda formato errado, usamos o simulado."""
     monkeypatch.setattr(llm, "ask_json", lambda s, u: {"roles": [{"skill": "magia"}]})
-    assert briefing.parse_briefing(BRIEFING)["mode"] == "simulado"
+    ruim = briefing.parse_briefing(BRIEFING)
+    assert ruim["mode"] == "simulado" and ruim["name"] == ""  # sem IA, o nome fica em branco
     monkeypatch.setattr(llm, "ask_json", lambda s, u: None)  # falha de rede/limite
     assert briefing.parse_briefing(BRIEFING)["mode"] == "simulado"
 

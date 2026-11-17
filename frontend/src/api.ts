@@ -37,7 +37,7 @@ export const api = {
   projects: () => call<Project[]>("/api/projects"),
   squads: (id: string) => call<SquadsResponse>(`/api/projects/${id}/squads`),
   parseBriefing: (text: string) =>
-    call<{ duration_weeks: number; roles: Role[]; mode: Mode }>("/api/briefing/parse", { text }),
+    call<{ name: string; duration_weeks: number; roles: Role[]; mode: Mode }>("/api/briefing/parse", { text }),
   buildCustom: (body: CustomBody) => call<SquadsResponse>("/api/squads/build", body),
   whatIf: (projectId: string, body: { profile: string; assignments: (string | null)[]; role_index: number; custom: CustomBody | null }) =>
     call<{ current: Squad; substitutes: Substitute[] }>(`/api/projects/${projectId}/whatif`, body),
