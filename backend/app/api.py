@@ -148,7 +148,7 @@ def _check_role(project, role_index: int):
         raise HTTPException(422, "Papel inexistente.")
 
 
-@app.get("/api/health")
+@app.api_route("/api/health", methods=["GET", "HEAD"])
 def health():
     return {"status": "ok"}
 
