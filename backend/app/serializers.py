@@ -91,10 +91,13 @@ def squad_dict(squad, project, members, cfg):
     }
 
 
-def substitute_dict(sub):
+def substitute_dict(sub, member, skill, cfg):
     return {
         "member_id": sub.member_id,
         "name": sub.name,
+        "skill_level": member.level(skill),
+        "is_novato": member.is_novato(cfg.novato_months),
+        "months_in_citi": member.months_in_citi,
         "metrics": metrics_dict(sub.metrics),
         "delta_entrega": sub.delta_entrega,
         "delta_crescimento": sub.delta_crescimento,

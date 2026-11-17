@@ -2,7 +2,7 @@
 
 Ferramenta interna do CITi que monta 3 squads por projeto (Segura, Evolutiva e Balanceada) a partir das habilidades e da disponibilidade dos membros, e mostra o impacto de cada troca de pessoa antes da decisão.
 
-> Status: núcleo em Python e API (FastAPI) prontos, com 18 testes. Interface, chat com IA e deploy vêm nas próximas etapas.
+> Status: núcleo, API, briefing, chat de perfil, comparação das squads, tela de detalhes com gráficos e simulação de troca prontos (34 testes). Falta o deploy.
 
 ## Como o núcleo funciona
 - **O algoritmo decide, a IA só interpreta e explica.** Pontuação + restrições + busca local (hill climbing).
@@ -27,3 +27,17 @@ pip install -r requirements.txt
 uvicorn app.api:app --reload
 ```
 Documentação interativa: http://127.0.0.1:8000/docs
+
+## Rodar o site completo
+O site (React) já vem construído em `frontend/dist` e é servido pela própria API:
+```
+cd backend
+pip install -r requirements.txt
+python -m uvicorn app.api:app
+```
+Abra http://127.0.0.1:8000. Para alterar o front-end: `cd frontend && npm install && npm run build`.
+
+## IA (opcional)
+Sem configuração, o site funciona em **modo simulado** (regras simples) e avisa isso na tela.
+Para usar o modelo do Groq, crie `backend/.env` (arquivo ignorado pelo Git) com `GROQ_API_KEY=sua_chave`.
+A IA só interpreta texto; quem decide as squads e os níveis é o algoritmo.

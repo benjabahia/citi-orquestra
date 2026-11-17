@@ -59,3 +59,13 @@ def test_api_rejeita_pedidos_invalidos():
     assert client.post("/api/projects/pagamentos/whatif", json={**ok, "role_index": 99}).status_code == 422
     assert client.post("/api/projects/pagamentos/whatif", json={**ok, "assignments": ["zzz"] * 4}).status_code == 422
     assert client.post("/api/projects/pagamentos/apply", json={**ok, "member_id": "zzz"}).status_code == 422
+
+
+def test_site_e_servido_pelo_mesmo_servidor():
+    """A página inicial do site abre na raiz (quando o front-end foi construído)."""
+    from app.api import FRONTEND_DIST
+
+    if not FRONTEND_DIST.exists():
+        pytest.skip("front-end ainda não construído")
+    r = client.get("/")
+    assert r.status_code == 200 and "CITi Orquestra" in r.text
