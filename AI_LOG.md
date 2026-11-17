@@ -10,6 +10,7 @@ Ferramenta principal: Claude (Anthropic), usado para escrever o código; o Benja
 | Dom | API FastAPI (projetos, squads, substitutos, aplicar troca) | Endpoints e 5 testes | Aceito após revisão |
 | Seg | Adaptador Groq com reserva simulada, leitura de briefing, chat de perfil, tela React | Código e 15 testes novos | Aceito após revisão; verificado por screenshot e fluxo completo no navegador |
 | Dom | Núcleo em Python: dados, pontuação, alocação, trocas | Código inicial e testes | Corrigido várias vezes (ver abaixo) |
+| Ter | Entrevista com IA na aba Membro e checagem de coerência do perfil | Módulo `ai/interview.py`, 3 endpoints, tela `Interview.tsx` e 44 testes novos | Aguardando revisão do Benja |
 
 ## Onde a IA errou e como foi corrigido
 1. Sugeriu TypeScript/Next.js sem considerar que o Benja precisa revisar o código → trocado por Python/FastAPI.
@@ -22,5 +23,12 @@ Ferramenta principal: Claude (Anthropic), usado para escrever o código; o Benja
 9. O radar de cobertura saía idêntico nas 3 squads (só mostrava se o mínimo era atingido) → passou a mostrar o nível real de cada pessoa contra o exigido. Erro apontado pelo Benja.
 6. Substitutos sem nenhum nível na habilidade eram sugeridos → filtro de nível mínimo 1.
 
+## Entrevista com IA: como a regra "a IA propõe, a pessoa confirma" foi mantida
+- A IA faz de 1 a 3 perguntas e propõe um rascunho de níveis; o nível que vale é o que a pessoa escolhe na tela de revisão.
+- Toda saída da IA passa por validação estrita (habilidade existe, nível inteiro de 0 a 4, evidência com até 160 caracteres); se algo vier errado, o rascunho inteiro é recusado e a tela volta ao formulário.
+- O texto da pessoa vai para a IA como dado (dentro de um JSON) e o prompt manda ignorar ordens escritas nele. O nome da pessoa não é enviado.
+- Os avisos "Vale revisar" são decididos só por regras em Python (nível 4 em 3+ áreas; nível 3 ou 4 sem evidência no texto; novato com nível alto sem entrega real). Não bloqueiam o salvamento.
+- Limitação conhecida: a busca de evidência é por palavras-chave e não entende negação ("nunca fiz projeto real" conta como entrega real).
+
 ## Testes
-34 testes (`test_scenarios.py`, `test_api.py`, `test_ai.py`), todos passando, sem internet e sem chave de IA.
+124 testes (`test_scenarios.py`, `test_api.py`, `test_ai.py`, `test_recommend.py`, `test_stress.py`, `test_members_csv.py`, `test_interview.py`), todos passando, sem internet e sem chave de IA (nos testes da entrevista a resposta da IA é simulada).

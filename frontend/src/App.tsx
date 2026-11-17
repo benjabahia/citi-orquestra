@@ -67,7 +67,7 @@ export default function App() {
           )}
         </section>
 
-        <main>{meta && (tab === "gerente" ? <Manager meta={meta} /> : <Member meta={meta} />)}</main>
+        <main>{meta && (tab === "gerente" ? <Manager meta={meta} /> : <Member key={mode ?? "carregando"} meta={meta} aiMode={mode} />)}</main>
 
         <footer className="foot">
           <span>CITi Orquestra · protótipo para o desafio O Escopo é Seu</span>

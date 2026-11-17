@@ -147,3 +147,22 @@ export interface Profile {
   skills: Record<string, number>;
   learning_goals: string[];
 }
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  text: string;
+}
+
+export interface DraftSkill {
+  skill: string;
+  skill_label: string;
+  level: number;
+  anchor: string;
+  evidence: string;
+}
+
+export interface CoherenceWarning {
+  kind: "muitos_4" | "sem_evidencia" | "novato_alto" | "afirmacao_ampla";
+  skill: string | null;
+  message: string;
+}

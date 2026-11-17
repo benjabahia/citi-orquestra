@@ -8,7 +8,7 @@ Rodar localmente (na pasta backend):
 Documentação interativa automática: http://127.0.0.1:8000/docs
 """
 from functools import lru_cache
-from typing import Optional
+from typing import Literal, Optional
 
 import re
 import unicodedata
@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 from .allocator import build_squads
 from .config import DEFAULT_CONFIG, LEVEL_LABELS, PROFILES, SKILL_LABELS
 from .ai import briefing as briefing_ai
+from .ai import interview
 from .ai import llm
 from .ai import profile_chat
 from .data import default_availability, load_scenario
@@ -306,6 +307,68 @@ def profile_interpret(req: ProfileRequest):
         "summary": hints["summary"],
         "mode": hints["mode"],
     }
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    text: str = Field(min_length=1, max_length=interview.MAX_ANSWER_CHARS)
+
+
+class InterviewRequest(BaseModel):
+    """Entrevista com IA: o nome fica no servidor; só os meses e a conversa vão para a IA."""
+
+    name: str = Field(min_length=1, max_length=60)
+    months_in_citi: int
+    history: list[ChatMessage] = Field(min_length=1, max_length=interview.MAX_HISTORY)
+
+
+class CoherenceRequest(BaseModel):
+    months_in_citi: int
+    skills: dict[str, int]
+    history: list[ChatMessage] = Field(min_length=1, max_length=interview.MAX_HISTORY)
+
+
+def _interview_inputs(months: int, history: list[ChatMessage]):
+    if months not in {m["months"] for m in profile_chat.MONTH_CHOICES}:
+        raise HTTPException(422, "Escolha há quanto tempo você está no CITi.")
+    try:
+        return interview.validate_history([m.model_dump() for m in history])
+    except interview.InterviewError as error:
+        raise HTTPException(422, str(error))
+
+
+def _ask(job):
+    """422 para pedido inválido; 503 quando a IA está desligada ou respondeu mal (a tela cai no formulário)."""
+    try:
+        return job()
+    except interview.InterviewError as error:
+        raise HTTPException(422, str(error))
+    except interview.AIUnavailable as error:
+        raise HTTPException(503, str(error))
+
+
+@app.post("/api/profile/interview/next")
+def interview_next(req: InterviewRequest):
+    """Próxima pergunta da entrevista (no máximo 3) ou done=true."""
+    history = _interview_inputs(req.months_in_citi, req.history)
+    return {**_ask(lambda: interview.next_question(req.months_in_citi, history)), "mode": "ia_real"}
+
+
+@app.post("/api/profile/interview/propose")
+def interview_propose(req: InterviewRequest):
+    """Rascunho de níveis (já validado) + avisos de coerência. A pessoa revisa antes de salvar."""
+    history = _interview_inputs(req.months_in_citi, req.history)
+    return {**_ask(lambda: interview.propose_draft(req.months_in_citi, history)), "mode": "ia_real"}
+
+
+@app.post("/api/profile/interview/check")
+def interview_check(req: CoherenceRequest):
+    """Refaz os avisos "Vale revisar" com os níveis que a pessoa escolheu (só regras, sem IA)."""
+    history = _interview_inputs(req.months_in_citi, req.history)
+    if any(s not in SKILL_LABELS or not 0 <= v <= 4 for s, v in req.skills.items()):
+        raise HTTPException(422, "Habilidade ou nível inválido.")
+    text = interview.person_text(history)
+    return {"warnings": interview.check_coherence(req.skills, req.months_in_citi, text, CFG)}
 
 
 # ---------------------------------------------------------------------------

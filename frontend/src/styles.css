@@ -290,3 +290,22 @@ body:has(.detail) .shell { padding-top: 36px; }
 .sheet-on { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 14px; }
 .sheet-errors { margin-top: 12px; padding: 12px 16px; background: var(--bad-soft); border-radius: 14px; line-height: 1.5; }
 .sheet-errors ul { margin: 8px 0 0; padding-left: 20px; }
+
+/* Entrevista com IA (aba Membro) */
+.privacy { padding: 10px 14px; border: 1px solid var(--line-strong); border-radius: 12px; color: var(--ink-2); font-size: 0.85rem; margin-bottom: 14px; }
+.note-box { padding: 10px 14px; border: 1px solid var(--line-strong); border-radius: 12px; color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+.chat { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 8px; }
+.chat li { padding: 10px 14px; border-radius: 14px; line-height: 1.45; white-space: pre-wrap; max-width: 92%; }
+.chat li.user { background: var(--raise); border: 1px solid var(--line); justify-self: end; }
+.chat li.assistant { background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.chat .who { display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+.chat li.assistant .who { color: var(--accent); }
+.thinking { margin-top: 14px; color: var(--accent); font-weight: 500; }
+.draft { padding: 10px 16px 14px; }
+.draft .proposed { color: var(--ink); font-weight: 600; }
+.evidence { margin: 6px 0 0; padding-left: 10px; border-left: 2px solid var(--accent-line); color: var(--ink-2); font-size: 0.9rem; font-style: italic; }
+.draft-row { margin-top: 10px; }
+.draft-row select { flex: 1 1 260px; width: auto; }
+.warn-box { margin: 10px 0 0; padding: 10px 14px; background: var(--warn-soft); border: 1px solid rgba(242, 184, 75, 0.35); border-radius: 12px; color: var(--ink-2); font-size: 0.88rem; line-height: 1.45; }
+.warn-tag { display: inline-block; margin-right: 6px; padding: 1px 8px; border-radius: 999px; background: var(--warn); color: #000; font-size: 0.72rem; font-weight: 700; }
+.interview .link { margin-top: 14px; }

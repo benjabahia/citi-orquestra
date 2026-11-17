@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
+import Interview from "./Interview";
 import { loadSavedMembers, STORAGE_KEY } from "./Manager";
 import type { Meta, Mode, Profile, Question } from "./types";
 
@@ -13,7 +14,9 @@ interface Answers {
 
 const EMPTY: Answers = { areas: [], levels: {}, months: null, goals: [], open: "" };
 
-export default function Member({ meta }: { meta: Meta }) {
+export default function Member({ meta, aiMode }: { meta: Meta; aiMode: Mode | null }) {
+  // Com a IA real ligada, começa pela entrevista; sem ela, o formulário de sempre.
+  const [flow, setFlow] = useState<"ia" | "form">(aiMode === "ia_real" ? "ia" : "form");
   const [questions, setQuestions] = useState<Question[]>([]);
   const [name, setName] = useState("");
   const [answers, setAnswers] = useState<Answers>(EMPTY);
@@ -63,11 +66,16 @@ export default function Member({ meta }: { meta: Meta }) {
     setStep(questions.findIndex((x) => x.id === "levels") + 1);
   }
 
-  function save() {
-    if (!review) return;
-    const others = loadSavedMembers().filter((m) => m.name !== review.profile.name);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...others, review.profile]));
+  // Mesmo formato e mesmo lugar (localStorage) para o formulário e para a entrevista.
+  function saveProfile(profile: Profile) {
+    const others = loadSavedMembers().filter((m) => m.name !== profile.name);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...others, profile]));
+    setName(profile.name);
     setDone(true);
+  }
+
+  function save() {
+    if (review) saveProfile(review.profile);
   }
 
   if (done) {
@@ -78,15 +86,31 @@ export default function Member({ meta }: { meta: Meta }) {
           Obrigado, {name.trim()}. Seu perfil já entra nas próximas squads montadas na aba do gerente. Você pode
           refazer o chat quando mudar de nível.
         </p>
-        <button className="primary" onClick={() => { setAnswers(EMPTY); setName(""); setStep(0); setReview(null); setDone(false); }}>
+        <button className="primary" onClick={() => { setAnswers(EMPTY); setName(""); setStep(0); setReview(null); setDone(false); setFlow(aiMode === "ia_real" ? "ia" : "form"); }}>
           Responder de novo
         </button>
       </section>
     );
   }
 
+  if (flow === "ia" && aiMode === "ia_real") {
+    return (
+      <section className="panel narrow">
+        <Interview meta={meta} questions={questions} onSave={saveProfile} onUseForm={() => setFlow("form")} />
+      </section>
+    );
+  }
+
   return (
     <section className="panel narrow">
+      {aiMode === "simulado" && step === 0 && (
+        <p className="note-box">
+          Modo simulado: a entrevista com IA está desligada neste servidor. Responda o formulário abaixo.
+        </p>
+      )}
+      {aiMode === "ia_real" && step === 0 && (
+        <button className="link" onClick={() => setFlow("ia")}>Prefiro a entrevista com IA</button>
+      )}
       <p className="muted small">
         Só você e o gerente do projeto veem o resultado (níveis, disponibilidade e objetivo), nunca o texto bruto.
       </p>

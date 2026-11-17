@@ -1,9 +1,9 @@
-import type { CustomBody, ImportResult, Meta, Mode, Profile, Project, Question, Role, Squad, SquadsResponse, StressResponse, Substitute } from "./types";
+import type { ChatMessage, CoherenceWarning, CustomBody, DraftSkill, ImportResult, Meta, Mode, Profile, Project, Question, Role, Squad, SquadsResponse, StressResponse, Substitute } from "./types";
 
-async function call<T>(path: string, body?: unknown): Promise<T> {
-  // Se o servidor não responder em 25 s, avisa em vez de deixar a tela esperando para sempre.
+async function call<T>(path: string, body?: unknown, timeoutMs = 25000): Promise<T> {
+  // Se o servidor não responder a tempo (padrão: 25 s), avisa em vez de deixar a tela esperando para sempre.
   const control = new AbortController();
-  const timer = setTimeout(() => control.abort(), 25000);
+  const timer = setTimeout(() => control.abort(), timeoutMs);
   let response: Response;
   try {
     response = await fetch(path, {
@@ -57,4 +57,11 @@ export const api = {
       summary: string;
       mode: Mode;
     }>("/api/profile/interpret", { name, answers }),
+  interviewNext: (body: { name: string; months_in_citi: number; history: ChatMessage[] }) =>
+    call<{ done: boolean; question: string | null; asked: number }>("/api/profile/interview/next", body, 40000),
+  interviewPropose: (body: { name: string; months_in_citi: number; history: ChatMessage[] }) =>
+    call<{ status: "ok" | "sem_evidencia"; message: string | null; skills: DraftSkill[]; warnings: CoherenceWarning[] }>(
+      "/api/profile/interview/propose", body, 40000),
+  interviewCheck: (body: { months_in_citi: number; skills: Record<string, number>; history: ChatMessage[] }) =>
+    call<{ warnings: CoherenceWarning[] }>("/api/profile/interview/check", body),
 };
