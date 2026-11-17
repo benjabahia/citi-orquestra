@@ -45,6 +45,25 @@ export interface Substitute {
   resolved_issues: string[];
 }
 
+export interface StressRow {
+  member_id: string;
+  name: string;
+  role_index: number;
+  skill_label: string;
+  critical: boolean;
+  risco_before: number;
+  risco_after: number;
+  delta_risco: number;
+  delta_entrega: number;
+  entrega_after: number;
+  main_issue: string | null;
+}
+
+export interface StressResponse {
+  results: StressRow[];
+  weakest_sentence: string;
+}
+
 export interface CustomBody {
   name: string;
   description: string;

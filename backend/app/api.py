@@ -30,6 +30,7 @@ from .serializers import (
     squad_dict,
     substitute_dict,
 )
+from .stress import stress_test, weakest_sentence
 from .whatif import _squad_from, apply_substitution, rank_substitutes, remove_member
 
 CFG = DEFAULT_CONFIG
@@ -199,6 +200,21 @@ def whatif(project_id: str, req: WhatIfRequest):
         "current": squad_dict(squad, project, members, CFG),
         "substitutes": [substitute_dict(sub, members[sub.member_id], skill, CFG) for sub in subs],
     }
+
+
+class StressRequest(SquadState):
+    custom: Optional[CustomProjectRequest] = Field(
+        None, description="preencher quando o projeto veio de um briefing (não é um exemplo pronto)"
+    )
+
+
+@app.post("/api/projects/{project_id}/stress")
+def stress(project_id: str, req: StressRequest):
+    """Teste de estresse: o que acontece com a squad se cada pessoa sair (pior caso primeiro)."""
+    project, members, availability = _context(project_id, req.custom)
+    squad = _rebuild(project, req, members, availability)
+    rows = stress_test(project, squad, members, availability, CFG)
+    return {"results": rows, "weakest_sentence": weakest_sentence(rows)}
 
 
 @app.post("/api/projects/{project_id}/apply")

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { api } from "./api";
 import { MentorGraph, Radar } from "./charts";
 import { Bar, Delta, LevelBar, num, riskTone, useTween } from "./ui";
-import type { CustomBody, Squad, SquadsResponse, Substitute } from "./types";
+import type { CustomBody, Squad, SquadsResponse, StressResponse, Substitute } from "./types";
 
 const TITLES: Record<Squad["profile"], string> = { segura: "Segura", evolutiva: "Evolutiva", balanceada: "Balanceada" };
 
@@ -40,6 +40,7 @@ export default function SquadDetail({ data, profile, custom, onBack }: {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [changes, setChanges] = useState(0);
+  const [stress, setStress] = useState<StressResponse | null>(null);
 
   const projectId = custom ? "custom" : data.project.id;
   const m = squad.metrics;
@@ -69,12 +70,18 @@ export default function SquadDetail({ data, profile, custom, onBack }: {
       if (role === null) return;
       const r = await api.apply(projectId, { profile, assignments: squad.assignments, role_index: role, custom, member_id: memberId });
       setSquad(r.squad);
+      setStress(null); // o resultado antigo não vale mais para a nova squad
       setChanges((c) => c + 1);
       setRole(null);
       setSubs(null);
     });
 
-  const reset = () => { setSquad(baseline); setRole(null); setSubs(null); setChanges(0); setError(""); };
+  const runStress = () =>
+    guard(async () => {
+      setStress(await api.stress(projectId, { profile, assignments: squad.assignments, custom }));
+    });
+
+  const reset = () => { setSquad(baseline); setRole(null); setSubs(null); setChanges(0); setError(""); setStress(null); };
   const loadOf = (id: string | null) => m.loads.find((l) => l.member_id === id);
   const scale = Math.max(1, ...m.loads.map((l) => Math.max(l.capacity, l.demand)));
   const visible = subs ? (showAll ? subs : subs.slice(0, 6)) : [];
@@ -217,6 +224,56 @@ export default function SquadDetail({ data, profile, custom, onBack }: {
           )}
         </section>
       )}
+
+      <section className="panel stress" aria-live="polite">
+        <div className="subs-head">
+          <div>
+            <h3>Teste de estresse: e se alguém sair?</h3>
+            <p className="muted small">
+              Simula a saída de cada pessoa da squad e mostra o que acontece com o risco e a entrega, do pior caso ao melhor.
+            </p>
+          </div>
+          <button className="btn" disabled={busy} onClick={runStress}>
+            {stress ? "Refazer o teste" : "Testar a squad"}
+          </button>
+        </div>
+        {stress && stress.results.length > 0 && (
+          <>
+            <p className="weakest">
+              <span className="badge">Ponto mais frágil</span> {stress.weakest_sentence}
+            </p>
+            <div className="table-wrap">
+              <table className="people stress-table">
+                <thead>
+                  <tr>
+                    <th>Pessoa</th><th>Papel</th><th>Risco depois da saída</th>
+                    <th className="num">Risco</th><th className="num">Entrega</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stress.results.map((r, i) => (
+                    <tr key={r.member_id} className={i === 0 ? "frail" : ""}>
+                      <td>{r.name}</td>
+                      <td>{r.skill_label}{r.critical && <span className="muted small"> · crítico</span>}</td>
+                      <td>
+                        <div className="meter-cell">
+                          <strong>{Math.round(r.risco_after)}</strong>
+                          <Bar value={r.risco_after} tone={riskTone(r.risco_after)} />
+                        </div>
+                      </td>
+                      <td className="num"><Delta value={r.delta_risco} goodWhen="down" /></td>
+                      <td className="num">
+                        <Delta value={r.delta_entrega} goodWhen="up" />
+                        <Bar value={r.entrega_after} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </section>
 
       <section className="panel">
         <h3>Pontos de atenção</h3>
