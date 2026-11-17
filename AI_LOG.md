@@ -32,6 +32,7 @@ Como a IA foi usada para construir o CITi Orquestra: o que ela propôs, o que eu
 | Ter 17/11 | Entrevista com IA e checagem de coerência no perfil do membro | Entrevista adaptativa, rascunho com evidências, regras de coerência (Claude Code) | Testei com texto exagerado e apontei problemas (ver erro 15); corrigido e aprovado |
 | Ter 17/11 | Disponibilidade real de horas (Claude Code) | Horas no perfil e na planilha, ajuste do gerente, "h livres · h exigidas" nas telas, 29 testes novos e uma cópia do resultado dos projetos prontos para provar que não mudaram | Defini as regras e os testes; a revisar no navegador |
 | Ter 17/11 | Exportar PDF e resumo (Claude Code) | Botão "Baixar PDF" com relatório A4 próprio para impressão, botão "Copiar resumo" e texto montado no servidor (`summary.py`), 17 testes novos | A revisar no navegador (impressão em PDF) |
+| Ter 17/11 | Corrigir a escada de crescimento em projetos por briefing (Claude Code) | Diagnóstico papel por papel do caso FisioAgenda, checagem final da escada no `allocator.py` e 92 testes novos (caso exato + varreduras com briefings sorteados) | Apontei o defeito ao gravar o vídeo e defini as regras e os testes; a revisar no navegador |
 
 ## Onde a IA errou e como foi corrigido
 
@@ -50,6 +51,7 @@ Como a IA foi usada para construir o CITi Orquestra: o que ela propôs, o que eu
 13. **A IA simplificou minha logo sem eu pedir.** Trocou o meu desenho por uma forma sólida, porque as linhas finas se misturavam em tamanho pequeno. Eu tinha pedido para usar a minha arte. Refeito com o desenho original, só recortado.
 14. **Logo no rodapé.** Ela foi colocada lá por iniciativa da IA e eu não gostei. Removida: a logo ficou só no menu, na aba do navegador e no README.
 15. **Entrevista com IA com perguntas genéricas e erro enganoso.** Ao testar com "sou expert em tudo", a IA repetiu três vezes uma pergunta vaga e a tela mostrou "fora do formato esperado", que parecia falha técnica. Pedi a correção: mensagens distintas para "resposta inválida" e "sem evidência", perguntas que citam o que a pessoa disse, e aviso de coerência para afirmações amplas sem exemplo.
+16. **Escada de crescimento só era garantida nos projetos de exemplo; num briefing o Evolutivo perdia para o Balanceado (achado ao gravar o vídeo).** No "FisioAgenda" (10 semanas, 5 papéis) o Evolutivo saiu com crescimento 28 e o Balanceado com 32. Causa: cada tipo de squad é montado pela sua própria nota (que mistura entrega, crescimento e risco) com uma busca local, e nada obrigava o resultado final a respeitar a ordem; o Evolutivo pôs os 2 novatos em papéis que não eram a meta deles. Correção: no fim da montagem o algoritmo confere a escada (crescimento Evolutivo ≥ Balanceado ≥ Seguro; entrega Seguro ≥ Balanceado) e, só se ela quebrar, refaz o squad fora do lugar, sem afrouxar as regras de novatos e de mentoria e evitando sobrecarga. O FisioAgenda passou a ter Evolutivo 52, Balanceado 32 e Seguro 0. Os 6 projetos prontos ficaram idênticos (comparados com a cópia salva), e varreduras com briefings sorteados não acham mais nenhum caso quebrado. *Erro que eu apontei.*
 
 ## O que eu mantive sob controle
 
@@ -61,4 +63,4 @@ Como a IA foi usada para construir o CITi Orquestra: o que ela propôs, o que eu
 
 ## Testes
 
-186 testes automatizados (`backend/tests/`), todos passando, sem internet e sem chave de IA. Cobrem regras de alocação, API, IA (com respostas falsas), recomendação, teste de estresse, importação de planilha, entrevista com IA, disponibilidade de horas e exportação do resumo. Os detalhes por grupo estão no [README](README.md#testes).
+278 testes automatizados (`backend/tests/`), todos passando, sem internet e sem chave de IA. Cobrem regras de alocação, escada entre os squads em projetos por briefing, API, IA (com respostas falsas), recomendação, teste de estresse, importação de planilha, entrevista com IA, disponibilidade de horas e exportação do resumo. Os detalhes por grupo estão no [README](README.md#testes).

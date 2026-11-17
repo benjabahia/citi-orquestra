@@ -71,6 +71,8 @@ Para cada projeto o sistema monta três opções, comparadas lado a lado numa ta
 
 Os três têm conjuntos de pessoas diferentes, e a escada é garantida por testes: a **entrega** cai de Seguro para Evolutivo e o **crescimento** sobe, sem empate entre os tipos.
 
+Em **qualquer** projeto, inclusive os criados por briefing e com planilha própria, o sistema confere no fim a escada **crescimento do Evolutivo ≥ Balanceado ≥ Seguro** e **entrega do Seguro ≥ Balanceado**. Se ela quebrar, refaz só o squad fora do lugar, mantendo as regras de novatos, a mentoria obrigatória e evitando sobrecarga. Nos projetos em que a escada já vale (incluindo os 6 prontos), nada muda.
+
 ### 2. Medidores: Entrega, Crescimento e Risco
 
 - **Entrega (0–100):** cobertura das habilidades exigidas x folga de horas. Quem aprende com mentor ainda rende menos que um veterano (a ajuda vale meio nível), e cada pessoa mentorada custa 2 pontos pelo tempo do mentor.
@@ -276,7 +278,7 @@ npm run build
 
 ## Testes
 
-**186 testes automatizados**, todos passando, que rodam sem internet e sem chave de IA:
+**278 testes automatizados**, todos passando, que rodam sem internet e sem chave de IA:
 
 ```
 cd backend
@@ -293,6 +295,7 @@ python -m pytest -q
 | Teste de estresse | pessoa única de habilidade crítica aparece como mais frágil; cobre todos os membros; funciona em projeto por briefing |
 | Importar planilha | arquivo válido; cada tipo de erro (nível, nome repetido ou vazio, habilidade, poucos membros, limite de linhas); projetos prontos não mudam |
 | Exportar resultado | resumo com todos os papéis e pessoas; números iguais aos medidores; marca de falta de horas; horas livres e exigidas; mentorias; ponto mais frágil só com o teste de estresse; vaga em aberto; estado atual depois de uma troca; projeto pronto e projeto por briefing com planilha; pedido inválido devolve 422 |
+| Escada entre squads | caso FisioAgenda (Evolutivo crescia menos que o Balanceado); varredura de 30 briefings sorteados com os membros de exemplo e 30 com cada uma das duas planilhas de teste: crescimento Evolutivo ≥ Balanceado ≥ Seguro, entrega Seguro ≥ Balanceado, regras de novatos e squads diferentes |
 | Disponibilidade de horas | perfil com e sem os campos novos; CSV com e sem as colunas novas e cada erro de horas (negativo, texto, acima do limite, decimal em semanas); horas informadas entram no cálculo; sobrecarga quando faltam horas; ajuste do gerente; troca, aplicar troca e teste de estresse com as mesmas horas; 2 semanas com 1 fora = 50%; os 6 projetos prontos idênticos aos de antes |
 
 Além dos testes automáticos, o site foi percorrido de ponta a ponta no navegador a cada mudança visual.
@@ -319,7 +322,7 @@ backend/
     config.py          regras e pesos ajustáveis
     models.py          dados do domínio
     scoring.py         medidores e mentoria
-    allocator.py       montagem dos 3 squads
+    allocator.py       montagem dos 3 squads (e checagem final da escada)
     whatif.py          trocas e remoções
     recommend.py       recomendação por prioridade
     stress.py          teste de estresse

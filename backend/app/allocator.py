@@ -53,6 +53,27 @@ def _sort_key(state: tuple) -> tuple:
     return tuple("" if s is None else s for s in state)
 
 
+def _novato_rule(profile: str, project: Project, members: dict, pool: list, cfg: Config):
+    """Regra de novatos de cada tipo, como uma função "quanto falta para cumprir" (0 = cumpre).
+
+    - Seguro:     nenhum novato.
+    - Balanceado: exatamente 1 (se houver novato disponível).
+    - Evolutivo:  pelo menos max(evolutiva_min_novatos, metade dos papéis), limitado a quantos existem.
+    """
+    n_novatos = sum(1 for m in pool if members[m].is_novato(cfg.novato_months))
+    min_novatos = min(max(cfg.evolutiva_min_novatos, len(project.roles) // 2), n_novatos)
+
+    def gap(state) -> int:
+        k = sum(1 for s in state if s is not None and members[s].is_novato(cfg.novato_months))
+        if profile == "segura":
+            return k
+        if profile == "balanceada":
+            return abs(k - min(1, n_novatos))
+        return max(0, min_novatos - k)  # evolutiva
+
+    return gap
+
+
 def build_squad(
     profile: str,
     project: Project,
@@ -71,24 +92,12 @@ def build_squad(
     n = len(project.roles)
     rng = random.Random(f"{seed}-{profile}-{project.id}")
     notes = []
-
-    novatos_in_pool = [m for m in pool if members[m].is_novato(cfg.novato_months)]
-    min_novatos = min(max(cfg.evolutiva_min_novatos, n // 2), len(novatos_in_pool))
-
-    def count_novatos(state):
-        return sum(1 for s in state if s is not None and members[s].is_novato(cfg.novato_months))
+    novato_gap = _novato_rule(profile, project, members, pool, cfg)
 
     def feasible(state, strict):
         if frozenset(s for s in state if s is not None) in exclude:
             return False
-        if not strict:
-            return True
-        k = count_novatos(state)
-        if profile == "segura":
-            return k == 0
-        if profile == "balanceada":
-            return k == min(1, len(novatos_in_pool))
-        return k >= min_novatos  # evolutiva
+        return not strict or novato_gap(state) == 0
 
     cache = {}
 
@@ -186,4 +195,172 @@ def build_squads(
         evolutiva, balanceada = option_a
     else:
         balanceada, evolutiva = option_b
-    return {"segura": segura, "evolutiva": evolutiva, "balanceada": balanceada}
+    return _enforce_ladder(segura, balanceada, evolutiva, project, members, availability, cfg)
+
+
+# ---------------------------------------------------------------------------
+# Escada entre os tipos de squad
+# ---------------------------------------------------------------------------
+# Cada tipo é montado pela SUA nota, que mistura entrega, crescimento e risco.
+# Isso não garante sozinho a escada do produto:
+#     crescimento: Evolutivo >= Balanceado >= Seguro
+#     entrega:     Seguro >= Balanceado
+# (a busca é local e pode parar num arranjo "bom o bastante" para a nota, mas com
+# menos crescimento que o Balanceado). Por isso, no fim, conferimos a escada e,
+# só se ela quebrar, refazemos o squad que ficou fora do lugar. Nos projetos em
+# que a escada já vale, nada muda.
+
+
+def _ids(squad: Squad) -> frozenset:
+    return _ids_of_state(squad.assignments)
+
+
+def _repair_squad(squad, limits, starts, project, members, availability, cfg, exclude, restarts=8):
+    """Procura um squad do MESMO tipo que respeite `limits` (lista de
+    (medidor, ">=" ou "<=", valor)). Devolve o squad novo, ou None se não achar.
+
+    A busca é a mesma subida de encosta, mas com uma ordem de prioridades:
+      1º cumprir a regra de novatos do tipo;
+      2º mentor para quem precisa;
+      3º cumprir os limites da escada;
+      4º ter o mínimo de pessoas sobrecarregadas (sobrecarga evitável não entra);
+      5º só então, a nota normal do tipo de squad (entrega, risco...).
+    O squad novo só é aceito se cumpre a escada e não piora a regra de novatos
+    nem a de mentoria em relação ao squad original.
+    """
+    pool = available_pool(project, members, availability)
+    novato_gap = _novato_rule(squad.profile, project, members, pool, cfg)
+    cache = {}
+
+    def metrics_of(state):
+        if state not in cache:
+            cache[state] = evaluate(project, state, members, availability, cfg)
+        return cache[state]
+
+    def unmentored(state):
+        return sum(1 for f in metrics_of(state).factors if f.kind == "sem_mentor")
+
+    def shortfall(state):
+        m, total = metrics_of(state), 0.0
+        for name, op, value in limits:
+            v = getattr(m, name)
+            total += max(0.0, value - v) if op == ">=" else max(0.0, v - value)
+        return round(total, 6)
+
+    def overloaded(state):
+        return sum(1 for f in metrics_of(state).factors if f.kind == "sobrecarga")
+
+    def key(state):
+        return (-novato_gap(state), -unmentored(state), -shortfall(state), -overloaded(state),
+                round(profile_objective(squad.profile, metrics_of(state), cfg), 6))
+
+    def allowed(state):
+        return _ids_of_state(state) not in exclude
+
+    def climb(current):
+        if not allowed(current):
+            # Começa de um arranjo proibido (ex.: o do Balanceado): o 1º passo é obrigatório.
+            options = [nb for nb in _neighbors(current, pool) if allowed(nb)]
+            if not options:
+                return None
+            current = max(options, key=key)  # max devolve o primeiro em caso de empate: estável
+        current_key = key(current)
+        while True:
+            best, best_key = None, current_key
+            for nb in _neighbors(current, pool):
+                if allowed(nb):
+                    k = key(nb)
+                    if k > best_key:
+                        best, best_key = nb, k
+            if best is None:
+                return current
+            current, current_key = best, best_key
+
+    # Além dos arranjos dados, alguns pontos de partida sorteados (semente fixa: resultado estável),
+    # porque a subida de encosta pode parar num "pico local" que não cumpre a escada.
+    rng = random.Random(f"escada-{squad.profile}-{project.id}")
+    n, k = len(project.roles), min(len(project.roles), len(pool))
+    for _ in range(restarts):
+        chosen = rng.sample(pool, k) + [None] * (n - k)
+        rng.shuffle(chosen)
+        starts = list(starts) + [tuple(chosen)]
+    found = [s for s in (climb(tuple(st)) for st in starts) if s is not None]
+    if not found:
+        return None
+    best = sorted(found, key=lambda s: (tuple(-x for x in key(s)), _sort_key(s)))[0]
+    original = tuple(squad.assignments)
+    if (shortfall(best) > 0 or novato_gap(best) > novato_gap(original)
+            or unmentored(best) > unmentored(original)):
+        return None
+    metrics = metrics_of(best)
+    return Squad(
+        profile=squad.profile,
+        assignments=best,
+        metrics=metrics,
+        objective=round(profile_objective(squad.profile, metrics, cfg), 2),
+        notes=squad.notes if novato_gap(best) else (),
+    )
+
+
+def _ids_of_state(state) -> frozenset:
+    return frozenset(s for s in state if s is not None)
+
+
+def _ladder_limits(profile: str, sq: dict) -> list:
+    """Os limites que o squad `profile` precisa respeitar em relação aos outros dois."""
+    seg, bal, evo = (sq[p].metrics for p in ("segura", "balanceada", "evolutiva"))
+    if profile == "evolutiva":
+        return [("crescimento", ">=", bal.crescimento)]
+    if profile == "segura":
+        return [("entrega", ">=", bal.entrega),
+                ("crescimento", "<=", min(bal.crescimento, evo.crescimento))]
+    return [  # balanceada: fica entre os outros dois
+        ("crescimento", ">=", seg.crescimento),
+        ("crescimento", "<=", evo.crescimento),
+        ("entrega", "<=", seg.entrega),
+    ]
+
+
+def _out_of_place(sq: dict) -> set:
+    """Quais tipos de squad estão envolvidos em algum degrau quebrado da escada."""
+    seg, bal, evo = (sq[p].metrics for p in ("segura", "balanceada", "evolutiva"))
+    bad = set()
+    if evo.crescimento < bal.crescimento:
+        bad |= {"evolutiva", "balanceada"}
+    if bal.crescimento < seg.crescimento or seg.entrega < bal.entrega:
+        bad |= {"segura", "balanceada"}
+    if seg.crescimento > evo.crescimento:
+        bad.add("segura")
+    return bad
+
+
+def _enforce_ladder(segura, balanceada, evolutiva, project, members, availability, cfg):
+    """Confere a escada e, se ela quebrar, refaz o squad fora do lugar.
+
+    Ordem de tentativa (do que menos piora o resultado para o que mais piora):
+      1. Evolutivo: busca um arranjo que cresça pelo menos o mesmo que o Balanceado.
+      2. Seguro: busca um arranjo sem novatos que entregue pelo menos o mesmo que o Balanceado
+         e não cresça mais que os outros dois (veteranos que têm o papel como meta contam
+         crescimento, e isso pode deixar o Seguro "acima" do Evolutivo).
+      3. Balanceado: refaz para caber entre os outros dois (crescimento entre o do Seguro
+         e o do Evolutivo, entrega até a do Seguro). Acontece quando o Evolutivo não
+         consegue crescer mais (ex.: poucos papéis e nenhum mentor que sirva a 2 novatos).
+    Cada refação respeita as regras de novatos e de mentoria do tipo e não repete
+    as pessoas dos outros dois squads. Se a escada já vale, nada muda.
+    """
+    sq = {"segura": segura, "balanceada": balanceada, "evolutiva": evolutiva}
+    for _ in range(3):
+        if not _out_of_place(sq):
+            break
+        for profile in ("evolutiva", "segura", "balanceada"):
+            if profile not in _out_of_place(sq):
+                continue
+            others = [sq[p] for p in sq if p != profile]
+            starts = [sq[profile].assignments] + [o.assignments for o in others]
+            novo = _repair_squad(
+                sq[profile], _ladder_limits(profile, sq), starts,
+                project, members, availability, cfg, frozenset(_ids(o) for o in others),
+            )
+            if novo is not None:
+                sq[profile] = novo
+    return {"segura": sq["segura"], "evolutiva": sq["evolutiva"], "balanceada": sq["balanceada"]}
