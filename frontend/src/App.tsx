@@ -35,8 +35,8 @@ export default function App() {
           </div>
           {mode && (
             <span className={`mode ${mode}`} title={mode === "simulado"
-              ? "A leitura de briefing e do chat usa regras simples, sem IA. A montagem das squads é a mesma nos dois modos."
-              : "A leitura de briefing e do chat usa um modelo de linguagem. A montagem das squads é feita pelo algoritmo."}>
+              ? "A leitura de briefing e do chat usa regras simples, sem IA. A montagem dos squads é a mesma nos dois modos."
+              : "A leitura de briefing e do chat usa um modelo de linguagem. A montagem dos squads é feita pelo algoritmo."}>
               {mode === "simulado" ? "IA em modo simulado" : "IA ativa"}
             </span>
           )}
@@ -62,7 +62,7 @@ export default function App() {
           {mode === "simulado" && (
             <p className="note">
               Modo simulado: briefing e chat são lidos por regras simples. Com a chave da IA no servidor, um modelo de
-              linguagem assume essa parte. A montagem das squads é a mesma nos dois modos.
+              linguagem assume essa parte. A montagem dos squads é a mesma nos dois modos.
             </p>
           )}
         </section>

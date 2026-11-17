@@ -1,4 +1,4 @@
-"""Mostra no terminal as 3 squads de um projeto (para você ver o motor funcionando).
+"""Mostra no terminal os 3 squads de um projeto (para você ver o motor funcionando).
 
 Uso (a partir da pasta citi-orquestra):
     python scripts/demo_cli.py                 # projeto padrão

@@ -94,7 +94,7 @@ export default function Member({ meta, aiMode }: { meta: Meta; aiMode: Mode | nu
       <section className="panel narrow">
         <h2>Perfil salvo</h2>
         <p>
-          Obrigado, {name.trim()}. Seu perfil já entra nas próximas squads montadas na aba do gerente. Você pode
+          Obrigado, {name.trim()}. Seu perfil já entra nas próximos squads montados na aba do gerente. Você pode
           refazer o chat quando mudar de nível.
         </p>
         <button className="primary" onClick={() => { setAnswers(EMPTY); setName(""); setStep(0); setReview(null); setDone(false); setFlow(aiMode === "ia_real" ? "ia" : "form"); }}>

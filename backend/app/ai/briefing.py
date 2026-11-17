@@ -1,5 +1,5 @@
 """Leitura do briefing: o gerente cola o texto do projeto e o sistema PROPÕE os papéis.
-O gerente sempre pode editar a proposta antes de montar as squads."""
+O gerente sempre pode editar a proposta antes de montar os squads."""
 import re
 
 from ..config import SKILLS, SKILL_LABELS

@@ -1,4 +1,4 @@
-"""Exportar o resultado: resumo da squad para colar no chat."""
+"""Exportar o resultado: resumo do squad para colar no chat."""
 from pathlib import Path
 
 import pytest
@@ -68,7 +68,7 @@ def test_horas_livres_e_exigidas_batem_com_a_squad():
 
 def test_mentorias_aparecem_com_quem_ensina_quem():
     squad = client.get("/api/projects/agenda-clinica/squads").json()["squads"]["evolutiva"]
-    assert squad["metrics"]["mentorships"], "o teste precisa de uma squad com mentoria"
+    assert squad["metrics"]["mentorships"], "o teste precisa de um squad com mentoria"
     texto = resumo("agenda-clinica", squad)
     nomes = {s["member_id"]: s["member_name"] for s in squad["slots"]}
     for x in squad["metrics"]["mentorships"]:

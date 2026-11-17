@@ -5,9 +5,9 @@ import type { Priority, Squad, SquadsResponse } from "./types";
 type Key = Squad["profile"];
 
 const PROFILES: { key: Key; title: string; text: string }[] = [
-  { key: "segura", title: "Segura", text: "Só quem já tem experiência." },
-  { key: "evolutiva", title: "Evolutiva", text: "Novatos com mentores." },
-  { key: "balanceada", title: "Balanceada", text: "Um novato com mentor." },
+  { key: "segura", title: "Seguro", text: "Só quem já tem experiência." },
+  { key: "evolutiva", title: "Evolutivo", text: "Novatos com mentores." },
+  { key: "balanceada", title: "Balanceado", text: "Um novato com mentor." },
 ];
 
 const METERS: { id: "entrega" | "crescimento" | "risco"; label: string; hint: string }[] = [
@@ -22,7 +22,7 @@ const PRIORITIES: { key: Priority; label: string }[] = [
   { key: "equilibrio", label: "Equilíbrio" },
 ];
 
-/** Tabela comparativa: as três squads lado a lado, com as linhas alinhadas por papel. */
+/** Tabela comparativa: os três squads lado a lado, com as linhas alinhadas por papel. */
 export default function SquadBoard({ data, onDetail, priority, onPriority, custom }: {
   data: SquadsResponse;
   onDetail: (p: Key) => void;
@@ -32,7 +32,7 @@ export default function SquadBoard({ data, onDetail, priority, onPriority, custo
 }) {
   const roles = data.project.roles;
   const rec = priority ? data.recommendations?.[priority] : undefined;
-  // Marca a coluna da squad recomendada (cabeçalho e células).
+  // Marca a coluna do squad recomendado (cabeçalho e células).
   const col = (key: Key) => (rec?.profile === key ? "rec" : undefined);
   return (
     <>
@@ -47,7 +47,7 @@ export default function SquadBoard({ data, onDetail, priority, onPriority, custo
     </div>
     <p className="muted small load-help">{HOURS_HELP}</p>
     <p className="sr" aria-live="polite">
-      {rec ? `Recomendada: squad ${PROFILES.find((p) => p.key === rec.profile)?.title}. ${rec.reason}` : ""}
+      {rec ? `Recomendado: squad ${PROFILES.find((p) => p.key === rec.profile)?.title}. ${rec.reason}` : ""}
     </p>
     <div className="table-wrap">
       <table className="compare">
@@ -57,7 +57,7 @@ export default function SquadBoard({ data, onDetail, priority, onPriority, custo
             <td />
             {PROFILES.map((p) => (
               <th key={p.key} scope="col" className={col(p.key)}>
-                {rec?.profile === p.key && <span className="badge">Recomendada</span>}
+                {rec?.profile === p.key && <span className="badge">Recomendado</span>}
                 <div className="col-title">{p.title}</div>
                 <div className="muted small">{p.text}</div>
                 {rec?.profile === p.key && <p className="rec-reason">{rec.reason}</p>}

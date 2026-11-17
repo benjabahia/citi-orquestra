@@ -1,4 +1,4 @@
-"""Recomendação por prioridade: qual das 3 squads combina com o momento do projeto.
+"""Recomendação por prioridade: qual dos 3 squads combina com o momento do projeto.
 
 Função PURA e sem IA: recebe os 3 medidores de cada squad e devolve qual
 recomendar e uma frase curta com os números reais (texto-modelo).
@@ -6,14 +6,14 @@ recomendar e uma frase curta com os números reais (texto-modelo).
 Nota de cada squad (quanto maior, melhor), com os pesos de PRIORITY_WEIGHTS:
     nota = peso_entrega * entrega + peso_crescimento * crescimento + peso_risco * (100 - risco)
 
-- prazo:      pesa entrega e risco baixo. Trava extra: nunca recomenda uma squad
-              cujo risco passa do menor risco entre as três em mais de
+- prazo:      pesa entrega e risco baixo. Trava extra: nunca recomenda um squad
+              cujo risco passa do menor risco entre os três em mais de
               `prazo_max_risk_gap` pontos.
 - formar:     pesa sobretudo o crescimento (um pouco de entrega e risco, para não
-              recomendar uma squad de formação que põe o projeto em perigo).
+              recomendar um squad de formação que põe o projeto em perigo).
 - equilibrio: os três medidores valem o mesmo.
 
-Empate (notas iguais até 2 casas): vence a primeira na ordem fixa da prioridade
+Empate (notas iguais até 2 casas): vence o primeiro na ordem fixa da prioridade
 (TIE_ORDER). Assim o resultado é sempre o mesmo para a mesma entrada.
 """
 import math
@@ -22,7 +22,7 @@ from .config import PRIORITY_WEIGHTS, PROFILE_TITLES, RECOMMEND_CONFIG
 
 PRIORITIES = ("prazo", "formar", "equilibrio")
 
-# Ordem de desempate: a squad que "combina mais" com a prioridade vem primeiro.
+# Ordem de desempate: o squad que "combina mais" com a prioridade vem primeiro.
 TIE_ORDER = {
     "prazo": ("segura", "balanceada", "evolutiva"),
     "formar": ("evolutiva", "balanceada", "segura"),
@@ -47,7 +47,7 @@ def score(priority: str, m: dict) -> float:
 
 
 def _best(values: dict, profile: str, lower_is_better=False) -> bool:
-    """A squad `profile` tem o melhor valor (empates contam como melhor)?"""
+    """O squad `profile` tem o melhor valor (empates contam como melhor)?"""
     target = min(values.values()) if lower_is_better else max(values.values())
     return abs(values[profile] - target) < EPS
 
@@ -61,7 +61,7 @@ def recommend(priority: str, metrics: dict, cfg=RECOMMEND_CONFIG) -> dict:
         raise ValueError(f"prioridade desconhecida: {priority}")
     order = [p for p in TIE_ORDER[priority] if p in metrics]
     if not order:
-        raise ValueError("nenhuma squad para comparar")
+        raise ValueError("nenhum squad para comparar")
 
     scores = {p: score(priority, metrics[p]) for p in order}
     candidates = list(order)
@@ -78,8 +78,8 @@ def recommend(priority: str, metrics: dict, cfg=RECOMMEND_CONFIG) -> dict:
 
     reason = _reason(priority, winner, metrics, blocked[0] if blocked else None)
     if len(tied) > 1:
-        others = " e a ".join(PROFILE_TITLES[p] for p in tied[1:])
-        reason += f" Empata com a {others}; vale a ordem fixa de desempate."
+        others = " e o ".join(PROFILE_TITLES[p] for p in tied[1:])
+        reason += f" Empata com o {others}; vale a ordem fixa de desempate."
     return {"priority": priority, "profile": winner, "reason": reason, "scores": scores}
 
 
@@ -104,11 +104,11 @@ def _reason(priority: str, winner: str, metrics: dict, blocked) -> str:
         elif low_r:
             text = f"Menor risco ({R}), com entrega {E}."
         else:
-            text = f"Entrega {E} e risco {R}: o melhor saldo entre as três."
+            text = f"Entrega {E} e risco {R}: o melhor saldo entre os três."
         if blocked:
             b = metrics[blocked]
             text += (
-                f" A {PROFILE_TITLES[blocked]} entregaria {show(b['entrega'])}, "
+                f" O {PROFILE_TITLES[blocked]} entregaria {show(b['entrega'])}, "
                 f"mas tem risco {show(b['risco'])}, muito acima."
             )
         return text
@@ -119,7 +119,7 @@ def _reason(priority: str, winner: str, metrics: dict, blocked) -> str:
         rival = max(cresc, key=lambda p: (cresc[p], -TIE_ORDER["formar"].index(p)))
         rm = metrics[rival]
         return (
-            f"Crescimento {C} com risco {R}. A {PROFILE_TITLES[rival]} cresce mais "
+            f"Crescimento {C} com risco {R}. O {PROFILE_TITLES[rival]} cresce mais "
             f"({show(rm['crescimento'])}), mas com risco {show(rm['risco'])}."
         )
 

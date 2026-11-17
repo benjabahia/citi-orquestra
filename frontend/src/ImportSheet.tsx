@@ -80,7 +80,7 @@ export default function ImportSheet({ members, onChange }: {
         </div>
       ) : (
         <p className="muted small">
-          Sem planilha, as squads usam os 24 membros de exemplo. Importe um CSV para montar este projeto com a sua equipe.
+          Sem planilha, os squads usam os 24 membros de exemplo. Importe um CSV para montar este projeto com a sua equipe.
         </p>
       )}
       <div className="row">

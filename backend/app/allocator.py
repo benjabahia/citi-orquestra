@@ -1,18 +1,18 @@
-"""Monta as 3 squads de um projeto (Segura, Evolutiva, Balanceada).
+"""Monta os 3 squads de um projeto (Seguro, Evolutivo, Balanceado).
 
 Como funciona (decisão Q3: quem decide é o ALGORITMO, não o LLM):
 
 1. Cada tipo de squad tem uma "nota" própria (profile_objective), que pesa
    entrega, crescimento e risco de um jeito diferente.
-2. A busca parte de várias squads iniciais e vai trocando pessoas enquanto a
+2. A busca parte de vários squads iniciais e vai trocando pessoas enquanto a
    nota melhorar (subida de encosta). Quem tem a maior nota no fim vence.
 3. Regras duras por tipo de squad (para as 3 opções serem realmente diferentes):
-   - Segura:     nenhum novato.
-   - Balanceada: exatamente 1 novato (se houver novato disponível).
-   - Evolutiva:  pelo menos 2 novatos (ou metade dos papéis), sempre com mentor.
-4. As 3 squads precisam ter pessoas diferentes entre si (nunca saem repetidas).
+   - Seguro:     nenhum novato.
+   - Balanceado: exatamente 1 novato (se houver novato disponível).
+   - Evolutivo:  pelo menos 2 novatos (ou metade dos papéis), sempre com mentor.
+4. Os 3 squads precisam ter pessoas diferentes entre si (nunca saem repetidas).
 
-O resultado é determinístico: mesma entrada e mesma `seed` dão a mesma squad.
+O resultado é determinístico: mesma entrada e mesma `seed` dão o mesmo squad.
 """
 import random
 
@@ -31,7 +31,7 @@ def available_pool(project: Project, members: dict, availability: dict) -> list:
 
 
 def _neighbors(state: tuple, pool: list):
-    """Todas as squads "vizinhas": trocar uma pessoa por alguém de fora, ou
+    """Todos os squads "vizinhos": trocar uma pessoa por alguém de fora, ou
     trocar duas pessoas de papel."""
     n = len(state)
     used = {s for s in state if s is not None}
@@ -172,9 +172,9 @@ def build_squads(
 
     segura = build("segura", set())
 
-    # Evolutiva e Balanceada podem disputar a mesma melhor squad. Quem é montada
+    # Evolutivo e Balanceado podem disputar o mesmo melhor squad. Quem é montado
     # por último pega as "sobras", então testamos as duas ordens e ficamos com a
-    # que dá a maior nota somada (cada squad medida pela nota do seu tipo).
+    # que dá a maior nota somada (cada squad medido pela nota do seu tipo).
     option_a = [build("evolutiva", {ids_of(segura)})]
     option_a.append(build("balanceada", {ids_of(segura), ids_of(option_a[0])}))
     option_b = [build("balanceada", {ids_of(segura)})]

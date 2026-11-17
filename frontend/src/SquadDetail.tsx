@@ -5,7 +5,7 @@ import { Bar, Delta, HOURS_HELP, HoursLine, LevelBar, num, riskTone, shortOfHour
 import { ReportButton } from "./Report";
 import type { CustomBody, Recommendation, Squad, SquadsResponse, StressResponse, Substitute } from "./types";
 
-const TITLES: Record<Squad["profile"], string> = { segura: "Segura", evolutiva: "Evolutiva", balanceada: "Balanceada" };
+const TITLES: Record<Squad["profile"], string> = { segura: "Seguro", evolutiva: "Evolutivo", balanceada: "Balanceado" };
 
 function BigMeter({ label, hint, value, base, kind }: {
   label: string; hint: string; value: number; base: number; kind: "good" | "risk";
@@ -77,7 +77,7 @@ export default function SquadDetail({ data, profile, custom, recommendation, onB
       if (role === null) return;
       const r = await api.apply(projectId, { profile, assignments: squad.assignments, role_index: role, custom, member_id: memberId });
       setSquad(r.squad);
-      setStress(null); // o resultado antigo não vale mais para a nova squad
+      setStress(null); // o resultado antigo não vale mais para o novo squad
       setChanges((c) => c + 1);
       setRole(null);
       setSubs(null);
@@ -132,11 +132,11 @@ export default function SquadDetail({ data, profile, custom, recommendation, onB
       {copyFallback !== null && (
         <div className="copy-fail" role="alert">
           Não consegui copiar sozinho: o navegador bloqueou o acesso à área de transferência. Selecione o texto abaixo e copie com Ctrl+C.
-          <textarea readOnly value={copyFallback} onFocus={(e) => e.currentTarget.select()} aria-label="Resumo da squad" />
+          <textarea readOnly value={copyFallback} onFocus={(e) => e.currentTarget.select()} aria-label="Resumo do squad" />
         </div>
       )}
 
-      <section className="meters" aria-label="Medidores da squad">
+      <section className="meters" aria-label="Medidores do squad">
         <BigMeter label="Entrega" hint="quanto maior, melhor" value={m.entrega} base={baseline.metrics.entrega} kind="good" />
         <BigMeter label="Crescimento" hint="quanto maior, melhor" value={m.crescimento} base={baseline.metrics.crescimento} kind="good" />
         <BigMeter label="Risco" hint="quanto menor, melhor" value={m.risco} base={baseline.metrics.risco} kind="risk" />
@@ -147,7 +147,7 @@ export default function SquadDetail({ data, profile, custom, recommendation, onB
       <div className="two">
         <section className="panel">
           <h3>Nível por habilidade</h3>
-          <p className="muted small">Quanto mais a área verde passa da linha tracejada, mais folga a squad tem naquele papel.</p>
+          <p className="muted small">Quanto mais a área verde passa da linha tracejada, mais folga o squad tem naquele papel.</p>
           <Radar levels={levels} slots={squad.slots} />
         </section>
         <section className="panel">
@@ -215,7 +215,7 @@ export default function SquadDetail({ data, profile, custom, recommendation, onB
             <div>
               <h3>Quem pode ocupar {current.skill_label}</h3>
               <p className="muted small">
-                Ordenado pelo melhor impacto para a squad {TITLES[profile]}. O sistema avisa os efeitos, mas a decisão é sua.
+                Ordenado pelo melhor impacto para o squad {TITLES[profile]}. O sistema avisa os efeitos, mas a decisão é sua.
               </p>
             </div>
             <div className="row">
@@ -278,11 +278,11 @@ export default function SquadDetail({ data, profile, custom, recommendation, onB
           <div>
             <h3>Teste de estresse: e se alguém sair?</h3>
             <p className="muted small">
-              Simula a saída de cada pessoa da squad e mostra o que acontece com o risco e a entrega, do pior caso ao melhor.
+              Simula a saída de cada pessoa do squad e mostra o que acontece com o risco e a entrega, do pior caso ao melhor.
             </p>
           </div>
           <button className="btn" disabled={busy} onClick={runStress}>
-            {stress ? "Refazer o teste" : "Testar a squad"}
+            {stress ? "Refazer o teste" : "Testar o squad"}
           </button>
         </div>
         {stress && stress.results.length > 0 && (
@@ -326,11 +326,11 @@ export default function SquadDetail({ data, profile, custom, recommendation, onB
       <section className="panel">
         <h3>Pontos de atenção</h3>
         {m.factors.length === 0 ? (
-          <p className="muted">Nenhum ponto de atenção nesta squad.</p>
+          <p className="muted">Nenhum ponto de atenção neste squad.</p>
         ) : (
           <ul className="factors">{m.factors.map((f, i) => <li key={i} className={f.kind}>{f.message}</li>)}</ul>
         )}
-        {changes > 0 && <p className="muted small">{changes} troca(s) aplicada(s) em relação à sugestão. {Object.keys(names).length} pessoas na squad.</p>}
+        {changes > 0 && <p className="muted small">{changes} troca(s) aplicada(s) em relação à sugestão. {Object.keys(names).length} pessoas no squad.</p>}
       </section>
     </div>
   );

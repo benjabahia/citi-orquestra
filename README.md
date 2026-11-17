@@ -6,7 +6,7 @@
 
 <p align="center"><b>Monte o squad certo e veja o impacto antes de decidir.</b></p>
 
-Ferramenta interna do CITi que monta **3 squads por projeto** (Segura, Evolutiva e Balanceada) a partir das habilidades e da disponibilidade dos membros, recomenda uma delas conforme a prioridade do gerente e mostra o impacto de cada decisão (trocar uma pessoa, alguém sair) **antes** de ela ser tomada.
+Ferramenta interna do CITi que monta **3 squads por projeto** (Seguro, Evolutivo e Balanceado) a partir das habilidades e da disponibilidade dos membros, recomenda um deles conforme a prioridade do gerente e mostra o impacto de cada decisão (trocar uma pessoa, alguém sair) **antes** de ela ser tomada.
 
 **Site no ar:** https://citi-orquestra.onrender.com
 **Vídeo de apresentação:** (link do YouTube a preencher)
@@ -44,20 +44,20 @@ O CITi Orquestra transforma essa decisão em algo visível e comparável. A regr
 
 | # | Funcionalidade | Em uma frase |
 |---|---|---|
-| 1 | [3 squads por projeto](#1-três-squads-por-projeto) | Segura, Evolutiva e Balanceada, sempre diferentes entre si |
+| 1 | [3 squads por projeto](#1-três-squads-por-projeto) | Seguro, Evolutivo e Balanceado, sempre diferentes entre si |
 | 2 | [Medidores](#2-medidores-entrega-crescimento-e-risco) | Entrega, Crescimento e Risco de 0 a 100, com cada fator explicado |
 | 3 | [Mentoria](#3-mentoria) | Novatos só entram com mentor, com regras claras de carga |
 | 4 | [Detalhes e gráficos](#4-detalhes-da-squad-e-gráficos) | Radar de nível real × exigido, grafo de mentoria, barras de carga |
 | 5 | [Trocar uma pessoa](#5-trocar-uma-pessoa-simulação) | Substitutos ordenados por impacto, com variação em tempo real |
-| 6 | [Recomendação por prioridade](#6-recomendação-por-prioridade) | "Prazo apertado", "Formar gente" ou "Equilíbrio" destacam uma squad |
-| 7 | [Teste de estresse](#7-teste-de-estresse-e-se-alguém-sair) | Mostra quem é o ponto mais frágil da squad |
+| 6 | [Recomendação por prioridade](#6-recomendação-por-prioridade) | "Prazo apertado", "Formar gente" ou "Equilíbrio" destacam um squad |
+| 7 | [Teste de estresse](#7-teste-de-estresse-e-se-alguém-sair) | Mostra quem é o ponto mais frágil do squad |
 | 8 | [Briefing com IA](#8-briefing-com-ia) | Cole o texto do cliente e receba papéis, duração e um nome sugerido |
 | 9 | [Perfil do membro](#9-perfil-do-membro-formulário-e-entrevista-com-ia) | Formulário guiado ou entrevista com IA, com checagem de coerência |
 | 10 | [Importar planilha](#10-importar-planilha-de-membros) | Use os membros reais do seu time em vez dos dados de exemplo |
 | 11 | [Projetos prontos](#11-projetos-prontos-e-o-projeto-armadilha) | 6 exemplos, incluindo um "armadilha" que mostra o risco aparecendo |
 | 12 | [IA real ou simulada](#12-ia-real-ou-simulada-sempre-visível) | O modo ativo aparece na tela; sem IA, tudo continua funcionando |
 | 13 | [Disponibilidade real de horas](#13-disponibilidade-real-de-horas) | Horas livres declaradas pelos membros, ajustáveis pelo gerente e comparadas com as exigidas |
-| 14 | [Exportar o resultado](#14-exportar-o-resultado) | PDF da squad e resumo curto para colar no WhatsApp ou no Slack |
+| 14 | [Exportar o resultado](#14-exportar-o-resultado) | PDF do squad e resumo curto para colar no WhatsApp ou no Slack |
 
 ### 1. Três squads por projeto
 
@@ -65,16 +65,16 @@ Para cada projeto o sistema monta três opções, comparadas lado a lado numa ta
 
 | Tipo | Ideia | Regra sobre novatos |
 |---|---|---|
-| **Segura** | Maior entrega e menor risco | Nenhum novato |
-| **Balanceada** | Meio-termo entre entrega e crescimento | Exatamente 1 novato, com mentor |
-| **Evolutiva** | Maior crescimento, aposta em quem está aprendendo | Pelo menos 2 novatos (ou metade dos papéis, se for maior), todos com mentor |
+| **Seguro** | Maior entrega e menor risco | Nenhum novato |
+| **Balanceado** | Meio-termo entre entrega e crescimento | Exatamente 1 novato, com mentor |
+| **Evolutivo** | Maior crescimento, aposta em quem está aprendendo | Pelo menos 2 novatos (ou metade dos papéis, se for maior), todos com mentor |
 
-As três têm conjuntos de pessoas diferentes, e a escada é garantida por testes: a **entrega** cai de Segura para Evolutiva e o **crescimento** sobe, sem empate entre os tipos.
+Os três têm conjuntos de pessoas diferentes, e a escada é garantida por testes: a **entrega** cai de Seguro para Evolutivo e o **crescimento** sobe, sem empate entre os tipos.
 
 ### 2. Medidores: Entrega, Crescimento e Risco
 
 - **Entrega (0–100):** cobertura das habilidades exigidas x folga de horas. Quem aprende com mentor ainda rende menos que um veterano (a ajuda vale meio nível), e cada pessoa mentorada custa 2 pontos pelo tempo do mentor.
-- **Crescimento (0–100):** quanto a squad atende às metas de aprendizado e dá apoio de mentor.
+- **Crescimento (0–100):** quanto o squad atende às metas de aprendizado e dá apoio de mentor.
 - **Risco (0–100):** soma de penalidades, cada uma explicada em português: papel sem ninguém, pessoa abaixo do nível exigido, sobrecarga de horas, novato sem mentor e **ponto único de falha** em papel crítico.
 
 Cada número vem com a lista de fatores que o formaram, para responder "de onde veio isso?".
@@ -82,11 +82,11 @@ Cada número vem com a lista de fatores que o formaram, para responder "de onde 
 ### 3. Mentoria
 
 - Precisa de mentor quem é **novato** (menos de 6 meses no CITi) ou está **2 ou mais níveis abaixo** do exigido.
-- O mentor tem nível 3 ou mais na **mesma habilidade**, está na mesma squad e atende no máximo 2 pessoas (2 h por semana cada).
+- O mentor tem nível 3 ou mais na **mesma habilidade**, está no mesmo squad e atende no máximo 2 pessoas (2 h por semana cada).
 - Papéis críticos pesam 1,5x em lacuna e em nível abaixo do exigido.
 - Tudo é configurável em `backend/app/config.py`.
 
-### 4. Detalhes da squad e gráficos
+### 4. Detalhes do squad e gráficos
 
 Ao clicar em **Ver detalhes**, a tela mostra:
 
@@ -101,16 +101,16 @@ Para qualquer papel, o botão **Trocar** lista os substitutos ordenados por impa
 
 ### 6. Recomendação por prioridade
 
-Três botões acima da tabela: **Prazo apertado**, **Formar gente** e **Equilíbrio**. Ao clicar, uma das três squads ganha o selo **Recomendada**, com uma frase que cita os números reais (por exemplo, "Maior entrega (100) e risco 0").
+Três botões acima da tabela: **Prazo apertado**, **Formar gente** e **Equilíbrio**. Ao clicar, um dos três squads ganha o selo **Recomendado**, com uma frase que cita os números reais (por exemplo, "Maior entrega (100) e risco 0").
 
 - Regra em Python, sem IA: cada prioridade pesa os medidores de um jeito.
-- Em "Prazo apertado" há uma **trava de risco**: nunca recomenda uma squad com risco muito acima das outras (limite ajustável em `config.py`).
+- Em "Prazo apertado" há uma **trava de risco**: nunca recomenda um squad com risco muito acima dos outros (limite ajustável em `config.py`).
 - A frase é gerada por texto-modelo a partir dos números, e o desempate é estável.
 - Funciona também em projetos criados por briefing.
 
 ### 7. Teste de estresse: "e se alguém sair?"
 
-Na tela de detalhes, o botão **Testar a squad** simula a saída de cada pessoa, uma por vez, e mostra a lista do pior para o melhor caso: risco depois da saída, variação de risco e de entrega. A primeira linha recebe a etiqueta **Ponto mais frágil**, com uma frase como "Se Rafael Teixeira sair, o papel de Back-end fica vago e o risco sobe de 12 para 56". Ao trocar alguém, o resultado antigo some e pode ser refeito.
+Na tela de detalhes, o botão **Testar o squad** simula a saída de cada pessoa, uma por vez, e mostra a lista do pior para o melhor caso: risco depois da saída, variação de risco e de entrega. A primeira linha recebe a etiqueta **Ponto mais frágil**, com uma frase como "Se Rafael Teixeira sair, o papel de Back-end fica vago e o risco sobe de 12 para 56". Ao trocar alguém, o resultado antigo some e pode ser refeito.
 
 ### 8. Briefing com IA
 
@@ -147,7 +147,7 @@ Em projetos criados por briefing, o gerente pode usar **o seu próprio time**:
 - Arquivos antigos, sem as colunas de disponibilidade, continuam funcionando: cada pessoa entra com 8 h por semana e 0 semanas fora. Célula vazia nessas colunas também vale o padrão.
 - **Importar planilha (CSV)** valida o arquivo e mostra **todos os erros de uma vez**, cada um com linha e coluna (nível fora de 0 a 4, habilidade desconhecida, nome vazio ou repetido, coluna faltando, menos de 3 pessoas, mais de 200 linhas; nas horas: valor negativo, texto no lugar de número, acima do limite e decimal em `semanas_fora`).
 - Aceita separador vírgula (o modelo) e ponto e vírgula (o Excel em português).
-- Com a planilha ativa, aparece o aviso **"Usando N membros da sua planilha"** e as squads, trocas e o teste de estresse usam só essas pessoas. **Voltar aos dados de exemplo** desfaz.
+- Com a planilha ativa, aparece o aviso **"Usando N membros da sua planilha"** e os squads, trocas e o teste de estresse usam só essas pessoas. **Voltar aos dados de exemplo** desfaz.
 - As horas da planilha entram no cálculo (ver [funcionalidade 13](#13-disponibilidade-real-de-horas)).
 - **Privacidade:** a planilha fica só no navegador (localStorage). Vai junto no pedido para o cálculo, mas nada é gravado no servidor.
 
@@ -170,7 +170,7 @@ Em projetos criados por briefing, as horas livres de cada pessoa vêm do que foi
 **De onde vêm as horas (a última vence):**
 1. **Perfil do membro:** o formulário e o último passo da entrevista com IA perguntam "Quantas horas por semana você consegue dedicar a projetos neste ciclo?" (0 a 40, com atalhos 2, 4, 6, 8, 10 e 12) e "Em quantas semanas dos próximos projetos você estará fora?" (inteiro de 0 a 12). Os valores ficam salvos no perfil (`weekly_hours` e `unavailable_weeks`). Perfis antigos, sem esses campos, continuam válidos com 8 h e 0 semanas.
 2. **Planilha:** as colunas opcionais `horas_livres_por_semana` e `semanas_fora` (sem elas, 8 h e 0 semanas).
-3. **Ajuste do gerente:** no passo "2. Confira os papéis", a seção recolhível **Ajustar disponibilidade da equipe** lista cada pessoa em jogo, já preenchida com o que veio da planilha ou do perfil, e permite mudar as horas e as semanas fora. Os ajustes valem ao montar as squads.
+3. **Ajuste do gerente:** no passo "2. Confira os papéis", a seção recolhível **Ajustar disponibilidade da equipe** lista cada pessoa em jogo, já preenchida com o que veio da planilha ou do perfil, e permite mudar as horas e as semanas fora. Os ajustes valem ao montar os squads.
 
 **Regras do cálculo:**
 - Horas livres no projeto = horas por semana × (semanas do projeto − semanas fora) ÷ semanas do projeto. Exemplo: 8 h num projeto de 2 semanas, com 1 semana fora, dá 4 h (50%).
@@ -182,17 +182,17 @@ Em projetos criados por briefing, as horas livres de cada pessoa vêm do que foi
 
 **Na tela:**
 - Ao lado do campo **Duração (semanas)**, atalhos de 2, 4, 6, 8 e 12 semanas (o campo continua editável).
-- Na tabela comparativa e na tela de detalhes, cada pessoa mostra "4 h livres · 6 h exigidas". Quando faltam horas, aparece uma etiqueta vermelha suave "faltam 2 h", e o cartão da squad mostra um resumo como "2 pessoas sem horas suficientes".
+- Na tabela comparativa e na tela de detalhes, cada pessoa mostra "4 h livres · 6 h exigidas". Quando faltam horas, aparece uma etiqueta vermelha suave "faltam 2 h", e o cartão do squad mostra um resumo como "2 pessoas sem horas suficientes".
 - Texto fixo: "Disponibilidade declarada pelos membros; o sistema não verifica as horas."
 
 ### 14. Exportar o resultado
 
-Duas formas de levar a squad para fora da ferramenta. As duas mostram o estado **atual** da squad, inclusive as trocas já aplicadas.
+Duas formas de levar o squad para fora da ferramenta. As duas mostram o estado **atual** do squad, inclusive as trocas já aplicadas.
 
-**PDF da squad.** O botão **Baixar PDF** aparece na tela de detalhes e também em cada cartão da tabela comparativa. Ele abre a caixa de impressão do navegador: escolha **Salvar como PDF**. Não usa biblioteca nova: é uma visão de relatório própria, em página A4, com fundo branco e texto escuro (mesmo com o site no tema escuro), e as barras e cores saem no arquivo. Conteúdo, nesta ordem:
-1. cabeçalho com a logo, o nome do projeto, o tipo da squad, a duração em semanas e a data de hoje;
+**PDF do squad.** O botão **Baixar PDF** aparece na tela de detalhes e também em cada cartão da tabela comparativa. Ele abre a caixa de impressão do navegador: escolha **Salvar como PDF**. Não usa biblioteca nova: é uma visão de relatório própria, em página A4, com fundo branco e texto escuro (mesmo com o site no tema escuro), e as barras e cores saem no arquivo. Conteúdo, nesta ordem:
+1. cabeçalho com a logo, o nome do projeto, o tipo do squad, a duração em semanas e a data de hoje;
 2. os três medidores (Entrega, Crescimento e Risco);
-3. mini-tabela comparando as três squads, com a atual destacada e o selo **Recomendada** (com a prioridade escolhida, como "Prazo apertado") quando a pessoa tiver clicado numa prioridade;
+3. mini-tabela comparando os três squads, com o atual destacado e o selo **Recomendado** (com a prioridade escolhida, como "Prazo apertado") quando a pessoa tiver clicado numa prioridade;
 4. tabela de pessoas: papel, pessoa, nível e "X h livres · Y h exigidas", com a marca "faltam X h" quando falta tempo;
 5. mentorias (quem ensina quem, em qual habilidade);
 6. alertas de risco;
@@ -200,7 +200,7 @@ Duas formas de levar a squad para fora da ferramenta. As duas mostram o estado *
 
 Menu, botões e tudo que não é relatório ficam de fora, e as linhas de tabela não são cortadas no meio da página.
 
-**Resumo para colar no chat.** O botão **Copiar resumo** (tela de detalhes) copia um texto curto, legível no WhatsApp e no Slack: projeto, tipo da squad, os três medidores, a lista "Papel: Pessoa (nível, X h livres · Y h exigidas)", as mentorias, o **ponto mais frágil** (só se o teste de estresse já tiver sido feito) e o aviso de disponibilidade. Aparece "Resumo copiado" por 3 segundos; se o navegador bloquear a área de transferência, a tela explica o problema e mostra o texto para copiar à mão.
+**Resumo para colar no chat.** O botão **Copiar resumo** (tela de detalhes) copia um texto curto, legível no WhatsApp e no Slack: projeto, tipo do squad, os três medidores, a lista "Papel: Pessoa (nível, X h livres · Y h exigidas)", as mentorias, o **ponto mais frágil** (só se o teste de estresse já tiver sido feito) e o aviso de disponibilidade. Aparece "Resumo copiado" por 3 segundos; se o navegador bloquear a área de transferência, a tela explica o problema e mostra o texto para copiar à mão.
 
 O texto é montado no servidor, por uma função Python pura (`backend/app/summary.py`, endpoint `POST /api/export/summary`, que recebe o mesmo corpo do teste de estresse mais o id do projeto), então é idêntico em projetos prontos e em projetos por briefing, e é testado sem navegador. Sem IA: os números vêm dos mesmos medidores da tela.
 
@@ -231,9 +231,9 @@ O uso de IA **no desenvolvimento** (Claude, onde errou e como foi corrigido) est
 ## Como funciona por dentro
 
 1. Cada tipo de squad tem uma "nota" própria que pesa entrega, crescimento e risco de um jeito diferente.
-2. A busca parte de várias squads iniciais e vai trocando pessoas enquanto a nota melhora (**subida de encosta**, ou hill climbing), respeitando as regras duras de cada tipo (quantidade de novatos, horas, mentor obrigatório).
-3. As três squads precisam ser diferentes; para Evolutiva e Balanceada o algoritmo tenta as duas ordens de construção e fica com a de maior nota total.
-4. O resultado é **determinístico**: mesma entrada, mesmas squads.
+2. A busca parte de vários squads iniciais e vai trocando pessoas enquanto a nota melhora (**subida de encosta**, ou hill climbing), respeitando as regras duras de cada tipo (quantidade de novatos, horas, mentor obrigatório).
+3. Os três squads precisam ser diferentes; para Evolutivo e Balanceado o algoritmo tenta as duas ordens de construção e fica com a de maior nota total.
+4. O resultado é **determinístico**: mesma entrada, mesmos squads.
 5. A recomendação, o teste de estresse e a checagem de coerência também são funções puras em Python, testadas sem IA.
 
 ---
@@ -286,7 +286,7 @@ python -m pytest -q
 
 | Grupo | O que garante |
 |---|---|
-| Regras de alocação | medidores entre 0 e 100; 3 squads sempre diferentes; regras de novatos por tipo; escada Segura > Balanceada > Evolutiva; regras de mentoria; projeto armadilha dispara o risco; falta de gente vira lacuna, não erro; trocas coerentes; resultado determinístico |
+| Regras de alocação | medidores entre 0 e 100; 3 squads sempre diferentes; regras de novatos por tipo; escada Seguro > Balanceado > Evolutivo; regras de mentoria; projeto armadilha dispara o risco; falta de gente vira lacuna, não erro; trocas coerentes; resultado determinístico |
 | API | rotas principais, erros 404 e 422 claros, site servido pelo mesmo servidor |
 | IA e projetos novos | briefing simulado e real validados; resposta ruim da IA cai no simulado; nível só das frases-âncora; entrevista com limites e proteção contra texto malicioso; checagem de coerência; projeto novo monta 3 squads e aceita trocas |
 | Recomendação | recomendação esperada nos 6 projetos para cada prioridade; números citados corretos; empate; trava de risco |
@@ -319,11 +319,11 @@ backend/
     config.py          regras e pesos ajustáveis
     models.py          dados do domínio
     scoring.py         medidores e mentoria
-    allocator.py       montagem das 3 squads
+    allocator.py       montagem dos 3 squads
     whatif.py          trocas e remoções
     recommend.py       recomendação por prioridade
     stress.py          teste de estresse
-    summary.py         resumo da squad para colar no chat
+    summary.py         resumo do squad para colar no chat
     members_csv.py     leitura e validação da planilha (inclui as horas)
     data.py            membros e projetos de exemplo
     api.py             endpoints FastAPI
@@ -347,6 +347,6 @@ AI_LOG.md              diário de uso de IA no desenvolvimento
 - A planilha importada vale só para projetos criados por briefing.
 - A planilha e o perfil agora trazem as horas livres, mas elas são **declaradas** pela pessoa (ou ajustadas pelo gerente) e o sistema **não verifica** se são reais. Quem não informa entra com 8 h por semana.
 - O perfil do membro fica só no navegador (localStorage).
-- "Balanceada com exatamente 1 novato", "Evolutiva com pelo menos 2" e o peso 1,5 dos papéis críticos são **escolhas de produto**, ajustáveis em `config.py`.
+- "Balanceado com exatamente 1 novato", "Evolutivo com pelo menos 2" e o peso 1,5 dos papéis críticos são **escolhas de produto**, ajustáveis em `config.py`.
 - No plano gratuito, o primeiro acesso após muito tempo parado pode levar cerca de 1 minuto; o monitor reduz isso.
 - O visual usa a fonte Inter Tight como substituta, e a logo é própria do projeto.

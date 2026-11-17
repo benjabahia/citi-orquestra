@@ -5,7 +5,7 @@ import type { Priority, Project, Recommendation, Squad } from "./types";
 
 type Key = Squad["profile"];
 
-export const TITLES: Record<Key, string> = { segura: "Segura", evolutiva: "Evolutiva", balanceada: "Balanceada" };
+export const TITLES: Record<Key, string> = { segura: "Seguro", evolutiva: "Evolutivo", balanceada: "Balanceado" };
 const ORDER: Key[] = ["segura", "evolutiva", "balanceada"];
 const PRIORITY_LABEL: Record<Priority, string> = {
   prazo: "Prazo apertado", formar: "Formar gente", equilibrio: "Equilíbrio",
@@ -30,7 +30,7 @@ const riskTone = (v: number): "ok" | "warn" | "bad" => (v >= 30 ? "bad" : v >= 1
 
 /**
  * Relatório para impressão (A4, fundo branco). Fica escondido na tela e só aparece ao imprimir.
- * Recebe a squad ATUAL (com as trocas já aplicadas) e as outras duas como estão na tela.
+ * Recebe o squad ATUAL (com as trocas já aplicadas) e os outros dois como estão na tela.
  */
 function Report({ project, profile, squads, recommendation, custom }: {
   project: Project; profile: Key; squads: Record<Key, Squad>;
@@ -69,7 +69,7 @@ function Report({ project, profile, squads, recommendation, custom }: {
         ))}
       </section>
 
-      <h2>Comparação das três squads</h2>
+      <h2>Comparação dos três squads</h2>
       <table className="rp-table">
         <thead>
           <tr><th>Squad</th><th>Entrega</th><th>Crescimento</th><th>Risco</th></tr>
@@ -82,9 +82,9 @@ function Report({ project, profile, squads, recommendation, custom }: {
               <tr key={k} className={k === profile ? "current" : ""}>
                 <td>
                   <strong>{TITLES[k]}</strong>
-                  {k === profile && <span className="rp-note"> (esta squad)</span>}
+                  {k === profile && <span className="rp-note"> (este squad)</span>}
                   {isRec && recommendation && (
-                    <span className="rp-badge">Recomendada · {PRIORITY_LABEL[recommendation.priority]}</span>
+                    <span className="rp-badge">Recomendado · {PRIORITY_LABEL[recommendation.priority]}</span>
                   )}
                 </td>
                 <td>{Math.round(mm.entrega)}</td>
@@ -130,7 +130,7 @@ function Report({ project, profile, squads, recommendation, custom }: {
 
       <h2>Mentorias</h2>
       {m.mentorships.length === 0 ? (
-        <p>Esta squad não precisa de mentoria.</p>
+        <p>Este squad não precisa de mentoria.</p>
       ) : (
         <ul>
           {m.mentorships.map((x, i) => (
@@ -141,7 +141,7 @@ function Report({ project, profile, squads, recommendation, custom }: {
 
       <h2>Alertas de risco</h2>
       {m.factors.length === 0 ? (
-        <p>Nenhum ponto de atenção nesta squad.</p>
+        <p>Nenhum ponto de atenção neste squad.</p>
       ) : (
         <ul>{m.factors.map((f, i) => <li key={i}>{f.message}</li>)}</ul>
       )}
@@ -185,7 +185,7 @@ export function ReportButton({ project, profile, squads, recommendation, custom,
   return (
     <>
       <button className={className} onClick={() => setPrinting(true)} disabled={printing}
-        aria-label={`Baixar PDF da squad ${TITLES[profile]}`}>
+        aria-label={`Baixar PDF do squad ${TITLES[profile]}`}>
         Baixar PDF
       </button>
       {printing && createPortal(

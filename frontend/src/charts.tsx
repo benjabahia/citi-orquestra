@@ -60,7 +60,7 @@ export function MentorGraph({ squad }: { squad: Squad }) {
   const people = squad.slots.filter((s) => s.member_id);
   const links = squad.metrics.mentorships;
   if (links.length === 0) {
-    return <p className="empty">Esta squad não precisa de mentoria: ninguém está abaixo do nível exigido.</p>;
+    return <p className="empty">Este squad não precisa de mentoria: ninguém está abaixo do nível exigido.</p>;
   }
   // Mentores na coluna da esquerda, mentorados na da direita: as setas ficam longas e legíveis.
   const mentorIds = [...new Set(links.map((l) => l.mentor_id))];

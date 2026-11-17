@@ -17,7 +17,7 @@ def _m(entrega, crescimento, risco):
 
 @pytest.fixture(scope="module")
 def example_metrics():
-    """Medidores reais das 3 squads de cada um dos 6 projetos de exemplo."""
+    """Medidores reais dos 3 squads de cada um dos 6 projetos de exemplo."""
     scenario = load_scenario()
     members = scenario.members_by_id()
     out = {}
@@ -34,7 +34,7 @@ EXPECTED = {
     "painel-industria": ("segura", "evolutiva", "segura"),
     "app-logistica": ("segura", "evolutiva", "balanceada"),
     "site-institucional": ("segura", "evolutiva", "balanceada"),
-    # Projeto armadilha: a Evolutiva cresce mais, mas o risco dela (47) pesa demais.
+    # Projeto armadilha: o Evolutivo cresce mais, mas o risco dele (47) pesa demais.
     "pagamentos": ("segura", "balanceada", "balanceada"),
 }
 
@@ -53,7 +53,7 @@ def test_prazo_nunca_recomenda_risco_muito_acima_nos_exemplos(example_metrics):
 
 
 def test_prazo_barra_squad_de_risco_muito_alto_mesmo_com_nota_maior():
-    """A Segura teria a melhor nota (entrega 100), mas o risco 40 está muito acima de 10."""
+    """O Seguro teria a melhor nota (entrega 100), mas o risco 40 está muito acima de 10."""
     metrics = {
         "segura": _m(100, 0, 40),
         "evolutiva": _m(40, 60, 30),
@@ -63,7 +63,7 @@ def test_prazo_barra_squad_de_risco_muito_alto_mesmo_com_nota_maior():
     assert rec["scores"]["segura"] > rec["scores"]["balanceada"]  # a trava é que muda o resultado
     assert rec["profile"] == "balanceada"
     assert rec["reason"] == (
-        "Menor risco (10), com entrega 65. A Segura entregaria 100, mas tem risco 40, muito acima."
+        "Menor risco (10), com entrega 65. O Seguro entregaria 100, mas tem risco 40, muito acima."
     )
 
 
@@ -76,13 +76,13 @@ def test_motivo_cita_os_numeros_corretos(example_metrics):
     )
     pag = recommend("formar", example_metrics["pagamentos"])
     assert pag["reason"] == (
-        "Crescimento 40 com risco 17. A Evolutiva cresce mais (50), mas com risco 47."
+        "Crescimento 40 com risco 17. O Evolutivo cresce mais (50), mas com risco 47."
     )
 
 
 @pytest.mark.parametrize("project_id", sorted(EXPECTED))
 def test_numeros_do_motivo_sao_os_da_squad_recomendada(example_metrics, project_id):
-    """O equilíbrio cita os 3 medidores: conferimos que são os da squad escolhida."""
+    """O equilíbrio cita os 3 medidores: conferimos que são os do squad escolhido."""
     metrics = example_metrics[project_id]
     rec = recommend("equilibrio", metrics)
     m = metrics[rec["profile"]]
@@ -101,16 +101,16 @@ def test_arredonda_igual_a_tela():
     [("prazo", "segura", "balanceada"), ("formar", "evolutiva", "balanceada"), ("equilibrio", "balanceada", "segura")],
 )
 def test_empate_tem_desempate_estavel(priority, winner, loser):
-    """Três squads com números idênticos: vence a primeira da ordem fixa da prioridade."""
+    """Três squads com números idênticos: vence o primeiro da ordem fixa da prioridade."""
     same = _m(80, 40, 10)
     metrics = {"segura": same, "evolutiva": same, "balanceada": same}
     rec = recommend(priority, metrics)
     assert rec["profile"] == winner
-    assert "Empata com a" in rec["reason"] and "ordem fixa de desempate" in rec["reason"]
-    # A ordem em que as squads chegam não muda o resultado.
+    assert "Empata com o" in rec["reason"] and "ordem fixa de desempate" in rec["reason"]
+    # A ordem em que os squads chegam não muda o resultado.
     reversed_metrics = dict(reversed(list(metrics.items())))
     assert recommend(priority, reversed_metrics) == rec
-    # Sem empate (uma squad bem pior), não aparece aviso de empate.
+    # Sem empate (um squad bem pior), não aparece aviso de empate.
     sem_empate = recommend(priority, {winner: same, loser: _m(10, 5, 90)})
     assert sem_empate["profile"] == winner and "Empata" not in sem_empate["reason"]
 

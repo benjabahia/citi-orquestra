@@ -38,7 +38,7 @@ def needs_mentor(member, role: Role, cfg: Config = DEFAULT_CONFIG) -> bool:
 
 
 def assign_mentors(project, assignments, members, availability, cfg: Config = DEFAULT_CONFIG):
-    """Escolhe um mentor da própria squad para cada pessoa que precisa.
+    """Escolhe um mentor do próprio squad para cada pessoa que precisa.
 
     Regras (Q9): mentor tem nível alto NA MESMA habilidade do papel do mentorando,
     atende no máximo 2 pessoas e prefere quem ainda tem horas sobrando.
@@ -83,7 +83,7 @@ def assign_mentors(project, assignments, members, availability, cfg: Config = DE
 
 
 def evaluate(project: Project, assignments, members, availability, cfg: Config = DEFAULT_CONFIG) -> Metrics:
-    """Calcula os 3 medidores (0 a 100) de uma squad.
+    """Calcula os 3 medidores (0 a 100) de um squad.
 
     - entrega     = cobertura das habilidades x folga de horas, menos o tempo gasto em mentoria
     - crescimento = meta de aprendizado atendida + apoio de mentor
@@ -179,7 +179,7 @@ def evaluate(project: Project, assignments, members, availability, cfg: Config =
                 Factor(
                     "sem_mentor",
                     cfg.risk_novato_sem_mentor,
-                    f"{m.name} precisa de mentoria em {skill_label}, mas ninguém na squad pode ensinar.",
+                    f"{m.name} precisa de mentoria em {skill_label}, mas ninguém no squad pode ensinar.",
                     mid,
                     role.skill,
                 )
@@ -211,7 +211,7 @@ def evaluate(project: Project, assignments, members, availability, cfg: Config =
                 Factor(
                     "spof",
                     cfg.risk_spof,
-                    f"Ninguém na squad cobre {_label(skill)} com nível suficiente.",
+                    f"Ninguém no squad cobre {_label(skill)} com nível suficiente.",
                     None,
                     skill,
                 )

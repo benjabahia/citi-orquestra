@@ -53,7 +53,7 @@ class Config:
     mentor_level_boost: int = 1         # com mentor, o nível efetivo sobe 1 (ao medir o RISCO)
     mentor_delivery_boost: float = 0.5  # ...mas na ENTREGA a ajuda do mentor vale só meio nível
     mentoring_delivery_cost: float = 2.0  # pontos de entrega perdidos por pessoa mentorada (tempo do mentor)
-    evolutiva_min_novatos: int = 2      # a Evolutiva leva pelo menos 2 novatos (ou metade dos papéis, se for maior)
+    evolutiva_min_novatos: int = 2      # o Evolutivo leva pelo menos 2 novatos (ou metade dos papéis, se for maior)
 
     # --- Cobertura ---
     backup_min_level: int = 2           # nível mínimo para "cobrir" uma habilidade
@@ -69,7 +69,7 @@ class Config:
     growth_goal_weight: float = 0.6     # papel bate com a meta de aprendizado
     growth_mentor_weight: float = 0.4   # aprende com apoio de um mentor
 
-    # --- Busca das squads ---
+    # --- Busca dos squads ---
     unmentored_penalty: float = 30.0    # na busca, novato sem mentor é muito ruim
     overload_search_penalty: float = 8.0  # na busca, evita pôr gente sem horas suficientes
 
@@ -92,7 +92,7 @@ PROFILE_WEIGHTS = {
     "balanceada": ProfileWeights(entrega=0.40, crescimento=0.35, risco=0.25),
 }
 
-PROFILE_TITLES = {"segura": "Segura", "evolutiva": "Evolutiva", "balanceada": "Balanceada"}
+PROFILE_TITLES = {"segura": "Seguro", "evolutiva": "Evolutivo", "balanceada": "Balanceado"}
 
 
 # --- Recomendação por prioridade (recommend.py) ---
@@ -106,7 +106,7 @@ PRIORITY_WEIGHTS = {
 
 @dataclass(frozen=True)
 class RecommendConfig:
-    # Em "prazo apertado", squad com risco mais de 15 pontos acima do menor risco não é recomendada.
+    # Em "prazo apertado", squad com risco mais de 15 pontos acima do menor risco não é recomendado.
     prazo_max_risk_gap: float = 15.0
 
 

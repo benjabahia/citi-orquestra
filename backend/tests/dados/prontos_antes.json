@@ -1560,7 +1560,7 @@
    "formar": {
     "priority": "formar",
     "profile": "balanceada",
-    "reason": "Crescimento 40 com risco 17. A Evolutiva cresce mais (50), mas com risco 47.",
+    "reason": "Crescimento 40 com risco 17. O Evolutivo cresce mais (50), mas com risco 47.",
     "scores": {
      "balanceada": 53.48,
      "evolutiva": 50.97,

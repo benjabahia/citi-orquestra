@@ -190,7 +190,7 @@ export default function Manager({ meta }: { meta: Meta }) {
       <section className="panel">
         <h2>1. Descreva o projeto</h2>
         <p className="muted">
-          Cole o briefing e o sistema propõe os papéis. Você revisa antes de montar as squads.
+          Cole o briefing e o sistema propõe os papéis. Você revisa antes de montar os squads.
         </p>
         <label htmlFor="briefing">Briefing do projeto</label>
         <textarea
@@ -309,7 +309,7 @@ export default function Manager({ meta }: { meta: Meta }) {
                 {sheet
                   ? "Horas vindas da sua planilha (8 h e 0 semanas para quem não informou)."
                   : "Sem planilha, os 24 membros de exemplo usam horas de exemplo (fictícias); quem respondeu o perfil usa o que declarou."}{" "}
-                As alterações valem ao montar as squads. A média é o que sobra por semana ao longo de {weeks} semana(s),
+                As alterações valem ao montar os squads. A média é o que sobra por semana ao longo de {weeks} semana(s),
                 descontadas as semanas fora.
               </p>
               <div className="table-wrap">

@@ -50,7 +50,7 @@ MEMBERS = SCENARIO.members_by_id()
 
 @lru_cache(maxsize=None)
 def _squads_for(project_id: str) -> dict:
-    """As 3 squads de um projeto. O resultado é sempre o mesmo, então guardamos."""
+    """Os 3 squads de um projeto. O resultado é sempre o mesmo, então guardamos."""
     project = SCENARIO.project(project_id)
     return build_squads(project, MEMBERS, SCENARIO.availability[project_id], CFG)
 
@@ -154,7 +154,7 @@ def _context(project_id: str, custom: Optional[CustomProjectRequest]):
 
 
 class SquadState(BaseModel):
-    """A squad como está na tela agora: qual perfil e quem ocupa cada papel."""
+    """O squad como está na tela agora: qual perfil e quem ocupa cada papel."""
 
     profile: str
     assignments: list[Optional[str]] = Field(description="id do membro (ou null) por papel")
@@ -183,7 +183,7 @@ def _rebuild(project, state: SquadState, members, availability):
 
 
 def _squads_payload(project, built, members):
-    """Resposta das 3 squads + a recomendação para cada prioridade (prazo, formar, equilíbrio)."""
+    """Resposta dos 3 squads + a recomendação para cada prioridade (prazo, formar, equilíbrio)."""
     squads = {p: squad_dict(built[p], project, members, CFG) for p in PROFILES}
     metrics = {p: squads[p]["metrics"] for p in PROFILES}
     return {"project": project_dict(project), "squads": squads, "recommendations": recommend_all(metrics)}
@@ -247,7 +247,7 @@ class StressRequest(SquadState):
 
 @app.post("/api/projects/{project_id}/stress")
 def stress(project_id: str, req: StressRequest):
-    """Teste de estresse: o que acontece com a squad se cada pessoa sair (pior caso primeiro)."""
+    """Teste de estresse: o que acontece com o squad se cada pessoa sair (pior caso primeiro)."""
     project, members, availability = _context(project_id, req.custom)
     squad = _rebuild(project, req, members, availability)
     rows = stress_test(project, squad, members, availability, CFG)
@@ -265,7 +265,7 @@ class SummaryRequest(StressRequest):
 
 @app.post("/api/export/summary")
 def export_summary(req: SummaryRequest):
-    """Texto curto da squad atual para colar no chat. Pedido inválido: 422."""
+    """Texto curto do squad atual para colar no chat. Pedido inválido: 422."""
     if req.custom is None:
         try:
             SCENARIO.project(req.project_id)
@@ -282,7 +282,7 @@ def export_summary(req: SummaryRequest):
 
 @app.post("/api/projects/{project_id}/apply")
 def apply(project_id: str, req: ApplyRequest):
-    """Aplica a troca (ou tira a pessoa) e devolve a squad recalculada."""
+    """Aplica a troca (ou tira a pessoa) e devolve o squad recalculado."""
     project, members, availability = _context(project_id, req.custom)
     _check_role(project, req.role_index)
     squad = _rebuild(project, req, members, availability)
@@ -315,7 +315,7 @@ def parse_briefing(req: BriefingRequest):
 
 @app.post("/api/squads/build")
 def build_custom(req: CustomProjectRequest):
-    """Monta as 3 squads para um projeto novo (papéis vindos do briefing, já editados)."""
+    """Monta os 3 squads para um projeto novo (papéis vindos do briefing, já editados)."""
     project, members, availability = _custom_context(req)
     return _squads_payload(project, build_squads(project, members, availability, CFG), members)
 

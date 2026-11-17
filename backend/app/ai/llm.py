@@ -5,7 +5,7 @@
   None e quem chamou usa a versão SIMULADA (regras simples). O site mostra
   qual modo respondeu ("IA real" ou "simulado").
 
-A IA só INTERPRETA texto e EXPLICA. Quem decide a squad é o algoritmo.
+A IA só INTERPRETA texto e EXPLICA. Quem decide o squad é o algoritmo.
 A chave nunca sai do servidor: o site não a conhece.
 """
 import json

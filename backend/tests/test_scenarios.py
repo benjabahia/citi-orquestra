@@ -26,7 +26,7 @@ def members(scenario):
 
 @pytest.fixture(scope="module")
 def all_squads(scenario, members):
-    """As 3 squads de cada um dos 6 projetos (calculado uma vez só)."""
+    """Os 3 squads de cada um dos 6 projetos (calculado uma vez só)."""
     return {
         p.id: build_squads(p, members, scenario.availability[p.id])
         for p in scenario.projects
@@ -72,21 +72,21 @@ def test_as_tres_squads_sao_diferentes(all_squads):
 
 # 4 ---------------------------------------------------------------------------
 def test_squad_segura_nao_tem_novatos(all_squads, members):
-    """A squad Segura nunca inclui novatos."""
+    """O squad Seguro nunca inclui novatos."""
     for squads in all_squads.values():
         assert _novatos(squads["segura"], members) == []
 
 
 # 5 ---------------------------------------------------------------------------
 def test_squad_balanceada_tem_exatamente_um_novato(all_squads, members):
-    """A squad Balanceada tem exatamente 1 novato (há novatos disponíveis)."""
+    """O squad Balanceado tem exatamente 1 novato (há novatos disponíveis)."""
     for squads in all_squads.values():
         assert len(_novatos(squads["balanceada"], members)) == 1
 
 
 # 6 ---------------------------------------------------------------------------
 def test_squad_evolutiva_nunca_deixa_novato_sem_mentor(all_squads, members):
-    """Na squad Evolutiva, todo novato tem mentor na própria squad."""
+    """No squad Evolutivo, todo novato tem mentor na próprio squad."""
     for project_id, squads in all_squads.items():
         squad = squads["evolutiva"]
         assert len(_novatos(squad, members)) >= 1, project_id
@@ -95,7 +95,7 @@ def test_squad_evolutiva_nunca_deixa_novato_sem_mentor(all_squads, members):
 
 # 7 ---------------------------------------------------------------------------
 def test_regras_de_mentoria(all_squads, members):
-    """Mentor tem nível 3+ na habilidade, atende no máx. 2 e está na mesma squad."""
+    """Mentor tem nível 3+ na habilidade, atende no máx. 2 e está no mesmo squad."""
     for squads in all_squads.values():
         for squad in squads.values():
             ids = {a for a in squad.assignments if a is not None}
@@ -112,7 +112,7 @@ def test_regras_de_mentoria(all_squads, members):
 
 # 8 ---------------------------------------------------------------------------
 def test_cada_tipo_de_squad_faz_o_que_promete(all_squads):
-    """Segura tem a melhor entrega e o menor risco; Evolutiva, o maior crescimento."""
+    """Seguro tem a melhor entrega e o menor risco; Evolutivo, o maior crescimento."""
     for project_id, squads in all_squads.items():
         seg, evo = squads["segura"].metrics, squads["evolutiva"].metrics
         assert seg.entrega >= evo.entrega, project_id
@@ -121,7 +121,7 @@ def test_cada_tipo_de_squad_faz_o_que_promete(all_squads):
 
 
 def test_as_tres_squads_formam_uma_escada_clara(all_squads):
-    """Entrega cai de Segura a Evolutiva e crescimento sobe, sem empate entre os tipos."""
+    """Entrega cai de Seguro a Evolutivo e crescimento sobe, sem empate entre os tipos."""
     for project_id, squads in all_squads.items():
         seg, bal, evo = (squads[k].metrics for k in ("segura", "balanceada", "evolutiva"))
         assert seg.entrega > bal.entrega > evo.entrega, project_id
@@ -130,7 +130,7 @@ def test_as_tres_squads_formam_uma_escada_clara(all_squads):
 
 
 def test_evolutiva_leva_mais_novatos_que_a_balanceada(all_squads, members):
-    """Evolutiva: pelo menos 2 novatos; Balanceada: exatamente 1; Segura: nenhum."""
+    """Evolutivo: pelo menos 2 novatos; Balanceado: exatamente 1; Seguro: nenhum."""
     for project_id, squads in all_squads.items():
         assert len(_novatos(squads["evolutiva"], members)) >= 2, project_id
         assert len(_novatos(squads["balanceada"], members)) == 1, project_id
@@ -202,7 +202,7 @@ def test_substitutos_vem_ordenados_pelo_impacto_e_deltas_batem(scenario, members
 
 # 12 --------------------------------------------------------------------------
 def test_aplicar_troca_recalcula_os_medidores(scenario, members, all_squads):
-    """Ao aplicar uma troca, os medidores refletem a nova squad."""
+    """Ao aplicar uma troca, os medidores refletem o novo squad."""
     project = scenario.project("agenda-clinica")
     availability = scenario.availability[project.id]
     squad = all_squads[project.id]["segura"]
@@ -215,7 +215,7 @@ def test_aplicar_troca_recalcula_os_medidores(scenario, members, all_squads):
 
 # 13 --------------------------------------------------------------------------
 def test_resultado_e_deterministico(scenario, members):
-    """Mesma entrada e mesma seed geram exatamente as mesmas squads."""
+    """Mesma entrada e mesma seed geram exatamente os mesmos squads."""
     project = scenario.project("loja-cosmeticos")
     availability = scenario.availability[project.id]
     a = build_squads(project, members, availability, seed=3)

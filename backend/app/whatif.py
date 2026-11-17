@@ -45,7 +45,7 @@ def remove_member(project, squad, role_index, members, availability, cfg: Config
 def apply_substitution(
     project, squad, role_index, new_member_id, members, availability, cfg: Config = DEFAULT_CONFIG
 ) -> Squad:
-    """Coloca `new_member_id` no papel. Se ele já está em outro papel da squad,
+    """Coloca `new_member_id` no papel. Se ele já está em outro papel do squad,
     os dois trocam de lugar."""
     assignments = list(squad.assignments)
     old = assignments[role_index]
@@ -64,7 +64,7 @@ def rank_substitutes(
     cfg: Config = DEFAULT_CONFIG,
     min_skill_level: int = 1,
 ) -> list:
-    """Candidatos de fora da squad para o papel `role_index`, do melhor ao pior
+    """Candidatos de fora do squad para o papel `role_index`, do melhor ao pior
     para o TIPO de squad (segura, evolutiva ou balanceada).
 
     Só entram candidatos com pelo menos `min_skill_level` (padrão: iniciante)

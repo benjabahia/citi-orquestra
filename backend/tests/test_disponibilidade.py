@@ -259,7 +259,7 @@ def test_troca_aplicar_e_estresse_usam_as_mesmas_horas():
     s = client.post("/api/projects/custom/stress", json=state).json()
     assert all(row["risco_before"] == squad["metrics"]["risco"] for row in s["results"])
 
-    # Mesma squad, com e sem o ajuste no corpo: as horas de quem foi ajustado mudam em todas as telas.
+    # Mesmo squad, com e sem o ajuste no corpo: as horas de quem foi ajustado mudam em todas as telas.
     alvo = squad["assignments"][1]
     ajustado = {**body, "availability": {alvo: {"weekly_hours": 1, "unavailable_weeks": 0}}}
     st2 = {**state, "custom": ajustado}

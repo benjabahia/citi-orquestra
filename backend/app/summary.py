@@ -1,7 +1,7 @@
-"""Resumo da squad para colar no chat (WhatsApp, Slack).
+"""Resumo do squad para colar no chat (WhatsApp, Slack).
 
-Função pura: recebe o projeto, a squad já calculada e devolve um texto.
-Nenhuma IA e nenhum cálculo novo: todos os números vêm dos medidores da squad,
+Função pura: recebe o projeto, o squad já calculado e devolve um texto.
+Nenhuma IA e nenhum cálculo novo: todos os números vêm dos medidores do squad,
 então o texto bate com o que aparece na tela.
 """
 from .config import PROFILE_TITLES, SKILL_LABELS
@@ -69,7 +69,7 @@ def build_summary(project, squad, members, cfg, custom: bool, weakest: str | Non
             mentee = members[mentorship.mentee_id].name
             lines.append(f"- {mentor} ensina {mentee} ({SKILL_LABELS[mentorship.skill]})")
     else:
-        lines.append("- Nenhuma (a squad não precisa)")
+        lines.append("- Nenhuma (o squad não precisa)")
 
     if weakest:
         lines += ["", f"*Ponto mais frágil:* {weakest}"]

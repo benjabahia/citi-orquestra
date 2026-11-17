@@ -38,7 +38,7 @@ def test_unico_backend_do_projeto_pagamentos_e_o_mais_fragil():
 
 
 def test_lista_cobre_todos_os_membros_da_squad():
-    """Uma linha por pessoa da squad, em qualquer perfil."""
+    """Uma linha por pessoa do squad, em qualquer perfil."""
     for profile, squad in client.get("/api/projects/loja-cosmeticos/squads").json()["squads"].items():
         r = _stress("loja-cosmeticos", squad)
         ids = {x["member_id"] for x in r["results"]}
@@ -55,7 +55,7 @@ def test_vaga_em_aberto_nao_entra_na_lista():
 
 
 def test_funciona_em_projeto_criado_por_briefing():
-    """Projeto custom: o corpo traz o projeto e o resultado cobre a squad montada."""
+    """Projeto custom: o corpo traz o projeto e o resultado cobre o squad montado."""
     built = client.post("/api/squads/build", json=CUSTOM).json()
     squad = built["squads"]["balanceada"]
     r = _stress("custom", squad, CUSTOM)
