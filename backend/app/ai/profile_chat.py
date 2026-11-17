@@ -27,6 +27,13 @@ MONTH_CHOICES = [
 ]
 
 MAX_GOALS = 2
+
+# Disponibilidade declarada pela pessoa (perfis antigos sem esses campos usam o padrão).
+DEFAULT_WEEKLY_HOURS = 8.0
+DEFAULT_UNAVAILABLE_WEEKS = 0
+MAX_WEEKLY_HOURS = 40
+MAX_UNAVAILABLE_WEEKS = 12
+HOUR_SUGGESTIONS = [2, 4, 6, 8, 10, 12]
 SKILL_OPTIONS = [{"value": s, "label": SKILL_LABELS[s]} for s in SKILLS]
 
 QUESTIONS = [
@@ -54,6 +61,28 @@ QUESTIONS = [
         "max": MAX_GOALS,
         "text": f"O que você mais quer aprender neste ciclo? (até {MAX_GOALS})",
         "options": SKILL_OPTIONS,
+    },
+    {
+        "id": "hours",
+        "type": "number",
+        "text": "Quantas horas por semana você consegue dedicar a projetos neste ciclo?",
+        "min": 0,
+        "max": MAX_WEEKLY_HOURS,
+        "step": 0.5,
+        "unit": "h por semana",
+        "suggestions": HOUR_SUGGESTIONS,
+        "default": DEFAULT_WEEKLY_HOURS,
+    },
+    {
+        "id": "away",
+        "type": "number",
+        "text": "Em quantas semanas dos próximos projetos você estará fora?",
+        "min": 0,
+        "max": MAX_UNAVAILABLE_WEEKS,
+        "step": 1,
+        "unit": "semana(s)",
+        "suggestions": [],
+        "default": DEFAULT_UNAVAILABLE_WEEKS,
     },
     {
         "id": "open",
@@ -128,4 +157,30 @@ def build_profile(name: str, answers: dict) -> dict:
         if not isinstance(level, int) or not 0 <= level <= 4:
             raise ProfileError(f"Escolha uma frase para {SKILL_LABELS[area]}.")
         skills[area] = level
-    return {"name": name, "months_in_citi": months, "skills": skills, "learning_goals": list(goals)}
+    weekly_hours, unavailable_weeks = availability_from(answers)
+    return {
+        "name": name, "months_in_citi": months, "skills": skills, "learning_goals": list(goals),
+        "weekly_hours": weekly_hours, "unavailable_weeks": unavailable_weeks,
+    }
+
+
+def _is_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def availability_from(answers: dict):
+    """Horas livres por semana (0 a 40) e semanas fora (inteiro de 0 a 12).
+
+    Campo ausente (perfil antigo) = padrão de 8 h e 0 semanas.
+    """
+    hours = answers.get("weekly_hours")
+    weeks = answers.get("unavailable_weeks")
+    if hours is None:
+        hours = DEFAULT_WEEKLY_HOURS
+    elif not _is_number(hours) or not 0 <= hours <= MAX_WEEKLY_HOURS:
+        raise ProfileError(f"Informe de 0 a {MAX_WEEKLY_HOURS} horas por semana.")
+    if weeks is None:
+        weeks = DEFAULT_UNAVAILABLE_WEEKS
+    elif not _is_number(weeks) or weeks != int(weeks) or not 0 <= weeks <= MAX_UNAVAILABLE_WEEKS:
+        raise ProfileError(f"Informe um número inteiro de 0 a {MAX_UNAVAILABLE_WEEKS} semanas fora.")
+    return float(hours), int(weeks)

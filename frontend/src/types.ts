@@ -71,6 +71,21 @@ export interface CustomBody {
   roles: Pick<Role, "skill" | "min_level" | "hours_per_week" | "critical">[];
   extra_members: Profile[];
   replace_members?: Profile[] | null;
+  /** Ajuste do gerente: id do membro -> horas livres e semanas fora. */
+  availability?: Record<string, Hours>;
+}
+
+export interface Hours {
+  weekly_hours: number;
+  unavailable_weeks: number;
+}
+
+export interface TeamMember extends Hours {
+  id: string;
+  name: string;
+  source: "planilha" | "perfil" | "exemplo";
+  is_novato: boolean;
+  available_hours: number;
 }
 
 export interface ImportError {
@@ -134,9 +149,14 @@ export interface Meta {
 
 export interface Question {
   id: string;
-  type: "multi" | "levels" | "choice" | "open";
+  type: "multi" | "levels" | "choice" | "open" | "number";
   text: string;
+  min?: number;
   max?: number;
+  step?: number;
+  unit?: string;
+  suggestions?: number[];
+  default?: number;
   optional?: boolean;
   options?: { value: string | number; label: string }[];
 }
@@ -146,6 +166,9 @@ export interface Profile {
   months_in_citi: number;
   skills: Record<string, number>;
   learning_goals: string[];
+  /** Perfis antigos não têm estes campos: o servidor usa 8 h e 0 semanas. */
+  weekly_hours?: number;
+  unavailable_weeks?: number;
 }
 
 export interface ChatMessage {

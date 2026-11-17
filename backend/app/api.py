@@ -24,7 +24,7 @@ from .ai import llm
 from .ai import profile_chat
 from .data import default_availability, load_scenario
 from .members_csv import parse_members_csv, template_csv
-from .models import Member, Project, Role
+from .models import Availability, Member, Project, Role
 from .recommend import recommend_all
 from .serializers import (
     member_dict,
@@ -73,6 +73,16 @@ class MemberProfileIn(BaseModel):
     months_in_citi: int = Field(ge=0, le=120)
     skills: dict[str, int]
     learning_goals: list[str] = []
+    # Disponibilidade declarada (perfis e planilhas antigos não têm: vale 8 h e 0 semanas).
+    weekly_hours: float = Field(8.0, ge=0, le=40)
+    unavailable_weeks: int = Field(0, ge=0, le=12)
+
+
+class AvailabilityIn(BaseModel):
+    """Ajuste do gerente para uma pessoa: horas livres por semana e semanas fora."""
+
+    weekly_hours: float = Field(ge=0, le=40)
+    unavailable_weeks: int = Field(0, ge=0, le=12)
 
 
 class CustomProjectRequest(BaseModel):
@@ -85,6 +95,10 @@ class CustomProjectRequest(BaseModel):
         None, min_length=3, max_length=200,
         description="planilha do gerente: quando preenchida, substitui os 24 membros de exemplo",
     )
+    availability: dict[str, AvailabilityIn] = Field(
+        default_factory=dict,
+        description="ajuste do gerente: id do membro -> horas livres e semanas fora (vence o declarado)",
+    )
 
 
 def _slug(text: str) -> str:
@@ -93,13 +107,19 @@ def _slug(text: str) -> str:
 
 
 def _custom_context(req: CustomProjectRequest):
-    """Projeto novo (vindo do briefing): devolve (projeto, membros, disponibilidade)."""
+    """Projeto novo (vindo do briefing): devolve (projeto, membros, disponibilidade).
+
+    A disponibilidade vem do que foi INFORMADO: planilha ou perfil (`weekly_hours`,
+    `unavailable_weeks`) e, por cima, o ajuste do gerente (`availability`). Como
+    trocar, aplicar e o teste de estresse chamam esta mesma função com o mesmo corpo,
+    os números ficam iguais em todas as telas.
+    """
     for r in req.roles:
         if r.skill not in SKILL_LABELS:
             raise HTTPException(422, f"Habilidade '{r.skill}' não existe.")
     sheet = req.replace_members is not None
     members = {} if sheet else dict(MEMBERS)
-    extras = []
+    extras, declared = [], {}
     news = [("imp", m) for m in (req.replace_members or [])] + [("novo", m) for m in req.extra_members]
     counters = {"imp": 0, "novo": 0}
     for prefix, m in news:
@@ -109,6 +129,7 @@ def _custom_context(req: CustomProjectRequest):
         member = Member(f"{prefix}{counters[prefix]}", m.name, m.months_in_citi, dict(m.skills), tuple(m.learning_goals))
         members[member.id] = member
         extras.append(member.id)
+        declared[member.id] = Availability(m.weekly_hours, m.unavailable_weeks)
     top = next((i for i, r in enumerate(req.roles) if r.critical), None)
     roles = tuple(
         Role(r.skill, r.min_level, r.hours_per_week,
@@ -116,7 +137,12 @@ def _custom_context(req: CustomProjectRequest):
         for i, r in enumerate(req.roles)
     )
     project = Project(f"custom-{_slug(req.name)}", req.name, req.description, req.duration_weeks, roles)
-    return project, members, default_availability(project, extras, only_extras=sheet)
+    availability = default_availability(project, extras, only_extras=sheet, declared=declared)
+    for member_id, adj in req.availability.items():
+        if member_id not in members:
+            raise HTTPException(422, f"Ajuste de horas para um membro que não está no projeto ('{member_id}').")
+        availability[member_id] = Availability(adj.weekly_hours, adj.unavailable_weeks)
+    return project, members, availability
 
 
 def _context(project_id: str, custom: Optional[CustomProjectRequest]):
@@ -265,6 +291,33 @@ def build_custom(req: CustomProjectRequest):
     """Monta as 3 squads para um projeto novo (papéis vindos do briefing, já editados)."""
     project, members, availability = _custom_context(req)
     return _squads_payload(project, build_squads(project, members, availability, CFG), members)
+
+
+def _source(member_id: str) -> str:
+    return "planilha" if member_id.startswith("imp") else "perfil" if member_id.startswith("novo") else "exemplo"
+
+
+@app.post("/api/squads/team")
+def custom_team(req: CustomProjectRequest):
+    """Quem está em jogo num projeto por briefing e com quantas horas (para a tabela de ajuste).
+
+    `weekly_hours` e `unavailable_weeks` já incluem o ajuste do gerente, se houver.
+    `available_hours` é a média por semana ao longo do projeto (descontadas as semanas fora).
+    """
+    project, members, availability = _custom_context(req)
+    rows = []
+    for member_id in sorted(members, key=lambda i: (_source(i) == "exemplo", i)):
+        a = availability.get(member_id, Availability(0.0))
+        rows.append({
+            "id": member_id,
+            "name": members[member_id].name,
+            "source": _source(member_id),
+            "is_novato": members[member_id].is_novato(CFG.novato_months),
+            "weekly_hours": a.weekly_hours,
+            "unavailable_weeks": a.unavailable_weeks,
+            "available_hours": round(a.effective_hours(project.duration_weeks), 2),
+        })
+    return {"members": rows, "duration_weeks": project.duration_weeks}
 
 
 class ImportRequest(BaseModel):

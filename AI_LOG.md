@@ -30,6 +30,7 @@ Como a IA foi usada para construir o CITi Orquestra: o que ela propôs, o que eu
 | Ter 17/11 | Teste de estresse "e se alguém sair?" | Endpoint, tabela e frase do ponto mais frágil (Claude Code) | Testei e aprovei |
 | Ter 17/11 | Importar planilha de membros em CSV | Leitura, validação com linha e coluna, tela de importação (Claude Code) | Pedi arquivos de teste (um válido e um com erros de propósito) e aprovei |
 | Ter 17/11 | Entrevista com IA e checagem de coerência no perfil do membro | Entrevista adaptativa, rascunho com evidências, regras de coerência (Claude Code) | Testei com texto exagerado e apontei problemas (ver erro 15); corrigido e aprovado |
+| Ter 17/11 | Disponibilidade real de horas (Claude Code) | Horas no perfil e na planilha, ajuste do gerente, "h livres · h exigidas" nas telas, 29 testes novos e uma cópia do resultado dos projetos prontos para provar que não mudaram | Defini as regras e os testes; a revisar no navegador |
 
 ## Onde a IA errou e como foi corrigido
 
@@ -59,4 +60,4 @@ Como a IA foi usada para construir o CITi Orquestra: o que ela propôs, o que eu
 
 ## Testes
 
-Mais de 80 testes automatizados (`backend/tests/`), todos passando, sem internet e sem chave de IA. Cobrem regras de alocação, API, IA (com respostas falsas), recomendação, teste de estresse, importação de planilha e entrevista com IA. Os detalhes por grupo estão no [README](README.md#testes).
+169 testes automatizados (`backend/tests/`), todos passando, sem internet e sem chave de IA. Cobrem regras de alocação, API, IA (com respostas falsas), recomendação, teste de estresse, importação de planilha, entrevista com IA e disponibilidade de horas. Os detalhes por grupo estão no [README](README.md#testes).

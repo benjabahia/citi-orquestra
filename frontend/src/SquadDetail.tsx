@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { api } from "./api";
 import { MentorGraph, Radar } from "./charts";
-import { Bar, Delta, LevelBar, num, riskTone, useTween } from "./ui";
+import { Bar, Delta, HOURS_HELP, HoursLine, LevelBar, num, riskTone, shortOfHours, useTween } from "./ui";
 import type { CustomBody, Squad, SquadsResponse, StressResponse, Substitute } from "./types";
 
 const TITLES: Record<Squad["profile"], string> = { segura: "Segura", evolutiva: "Evolutiva", balanceada: "Balanceada" };
@@ -120,11 +120,20 @@ export default function SquadDetail({ data, profile, custom, onBack }: {
 
       <section className="panel">
         <h3>Pessoas e carga de trabalho</h3>
-        <p className="muted small">Horas por semana: o risco sobe quando o papel e a mentoria pedem mais do que a pessoa tem.</p>
+        <p className="muted small">Horas por semana: o risco sobe quando as horas exigidas passam das horas livres.</p>
+        <p className="muted small load-help">{HOURS_HELP}</p>
+        <p className="muted small load-help">
+          {custom ? "Disponibilidade declarada pelos membros; o sistema não verifica as horas." : "Horas de exemplo (fictícias)."}
+        </p>
+        {shortOfHours(m.loads) > 0 && (
+          <p className="short-summary">
+            {shortOfHours(m.loads) === 1 ? "1 pessoa sem horas suficientes" : `${shortOfHours(m.loads)} pessoas sem horas suficientes`}
+          </p>
+        )}
         <div className="table-wrap">
           <table className="people">
             <thead>
-              <tr><th>Papel</th><th>Pessoa</th><th>Nível</th><th>Carga (horas por semana)</th><th><span className="sr">Ação</span></th></tr>
+              <tr><th>Papel</th><th>Pessoa</th><th>Nível</th><th>Horas livres × exigidas (por semana)</th><th><span className="sr">Ação</span></th></tr>
             </thead>
             <tbody>
               {squad.slots.map((s) => {
@@ -137,14 +146,15 @@ export default function SquadDetail({ data, profile, custom, onBack }: {
                     <td>{s.member_id ? <LevelBar level={s.member_level ?? 0} need={s.min_level} /> : "—"}</td>
                     <td>
                       {l ? (
-                        <div className="load" title={`Disponível: ${num(l.capacity)} h. Pedido: ${num(l.demand)} h (inclui ${num(l.mentoring_hours)} h de mentoria).`}>
+                        <div className="load" title={`Livres: ${num(l.capacity)} h. Exigidas: ${num(l.demand)} h (inclui ${num(l.mentoring_hours)} h de mentoria).`}>
                           <span className="track">
                             <i className={over ? "bad" : "ok"} style={{ width: `${(l.demand / scale) * 100}%` }} />
                             <b style={{ left: `${(l.capacity / scale) * 100}%` }} />
                           </span>
-                          <span className={`small ${over ? "bad-text" : ""}`}>
-                            {num(l.demand)} de {num(l.capacity)} h{over ? " · sobrecarga" : ""}
-                          </span>
+                          <HoursLine free={l.capacity} needed={l.demand} />
+                          {l.mentoring_hours > 0 && (
+                            <span className="muted small">inclui {num(l.mentoring_hours)} h de mentoria</span>
+                          )}
                         </div>
                       ) : "—"}
                     </td>

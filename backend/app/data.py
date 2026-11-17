@@ -172,17 +172,21 @@ def load_scenario() -> Scenario:
     return Scenario(members=members, projects=projects, availability=availability)
 
 
-def default_availability(project: Project, extra_member_ids=(), only_extras: bool = False) -> dict:
-    """Disponibilidade simulada para um projeto novo (ex.: vindo de um briefing).
+def default_availability(
+    project: Project, extra_member_ids=(), only_extras: bool = False, declared: dict | None = None
+) -> dict:
+    """Disponibilidade de um projeto novo (ex.: vindo de um briefing).
 
-    É determinística: o mesmo nome de projeto gera sempre as mesmas respostas.
-    Membros extras (que acabaram de responder o questionário ou vieram da planilha)
-    entram com 8h/semana. Com `only_extras=True` os 24 membros de exemplo ficam de fora.
+    - Os 24 membros de exemplo usam as horas SIMULADAS (fictícias), sempre as mesmas
+      para o mesmo nome de projeto. Com `only_extras=True` eles ficam de fora.
+    - Membros extras (perfil do chat ou planilha) usam o que foi DECLARADO em
+      `declared[id]`; quem não declarou nada entra com 8 h por semana e 0 semanas fora.
     """
+    declared = declared or {}
     if only_extras:
         availability = {}
     else:
         availability = _build_availability(project, random.Random(f"disponibilidade-{project.id}"))
     for member_id in extra_member_ids:
-        availability[member_id] = Availability(weekly_hours=8.0)
+        availability[member_id] = declared.get(member_id, Availability(weekly_hours=8.0))
     return availability

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "./api";
 import Interview from "./Interview";
 import { loadSavedMembers, STORAGE_KEY } from "./Manager";
+import { NumberField, num, validNumber } from "./ui";
 import type { Meta, Mode, Profile, Question } from "./types";
 
 interface Answers {
@@ -10,9 +11,15 @@ interface Answers {
   months: number | null;
   goals: string[];
   open: string;
+  weekly_hours: number | null;
+  unavailable_weeks: number | null;
 }
 
-const EMPTY: Answers = { areas: [], levels: {}, months: null, goals: [], open: "" };
+// Disponibilidade já vem preenchida com o padrão (8 h, 0 semanas); a pessoa ajusta.
+const EMPTY: Answers = { areas: [], levels: {}, months: null, goals: [], open: "", weekly_hours: 8, unavailable_weeks: 0 };
+
+/** Qual campo das respostas guarda cada pergunta de número. */
+const NUMBER_FIELD = { hours: "weekly_hours", away: "unavailable_weeks" } as const;
 
 export default function Member({ meta, aiMode }: { meta: Meta; aiMode: Mode | null }) {
   // Com a IA real ligada, começa pela entrevista; sem ela, o formulário de sempre.
@@ -43,6 +50,10 @@ export default function Member({ meta, aiMode }: { meta: Meta; aiMode: Mode | nu
     if (q.id === "areas") return answers.areas.length > 0;
     if (q.id === "levels") return answers.areas.every((a) => answers.levels[a] !== undefined);
     if (q.id === "months") return answers.months !== null;
+    if (q.type === "number") {
+      const field = NUMBER_FIELD[q.id as keyof typeof NUMBER_FIELD];
+      return validNumber(answers[field], q.min ?? 0, q.max ?? 40, (q.step ?? 1) === 1);
+    }
     return true; // metas e pergunta aberta são opcionais
   }
 
@@ -186,6 +197,19 @@ export default function Member({ meta, aiMode }: { meta: Meta; aiMode: Mode | nu
         </div>
       )}
 
+      {q?.type === "number" && (() => {
+        const field = NUMBER_FIELD[q.id as keyof typeof NUMBER_FIELD];
+        return (
+          <div className="q">
+            <label htmlFor={`n-${q.id}`} className="qtext">{q.text}</label>
+            <NumberField id={`n-${q.id}`} value={answers[field]} min={q.min ?? 0} max={q.max ?? 40} step={q.step}
+              unit={q.unit} suggestions={q.suggestions}
+              onChange={(v) => setAnswers((a) => ({ ...a, [field]: v }))} />
+            {q.id === "hours" && <p className="muted small">Conte só o tempo que sobra para projetos, fora aulas e outras atividades.</p>}
+          </div>
+        );
+      })()}
+
       {q?.type === "open" && (
         <div className="q">
           <label htmlFor="open" className="qtext">{q.text}</label>
@@ -201,6 +225,10 @@ export default function Member({ meta, aiMode }: { meta: Meta; aiMode: Mode | nu
             {Object.entries(review.profile.skills).map(([s, l]) => (
               <li key={s}>{meta.skills[s]}: nível {l} ({meta.levels[String(l)]})</li>
             ))}
+            <li>
+              Disponível: {num(review.profile.weekly_hours ?? 8)} h por semana
+              {(review.profile.unavailable_weeks ?? 0) > 0 ? `, fora em ${review.profile.unavailable_weeks} semana(s)` : ", sem semanas fora"}.
+            </li>
             {review.profile.learning_goals.length > 0 && (
               <li>Quer aprender: {review.profile.learning_goals.map((g) => meta.skills[g]).join(", ")}</li>
             )}

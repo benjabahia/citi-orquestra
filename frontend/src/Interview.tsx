@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
+import { NumberField, validNumber } from "./ui";
 import type { ChatMessage, CoherenceWarning, DraftSkill, Meta, Profile, Question } from "./types";
 
 const MAX_CHARS = 1500;
@@ -19,6 +20,8 @@ export default function Interview({ meta, questions, onSave, onUseForm }: {
 }) {
   const monthQ = questions.find((q) => q.id === "months");
   const goalQ = questions.find((q) => q.id === "goals");
+  const hoursQ = questions.find((q) => q.id === "hours");
+  const awayQ = questions.find((q) => q.id === "away");
   const anchors = questions.find((q) => q.id === "levels")?.options ?? [];
 
   const [step, setStep] = useState<Step>("start");
@@ -32,6 +35,8 @@ export default function Interview({ meta, questions, onSave, onUseForm }: {
   const [warnings, setWarnings] = useState<CoherenceWarning[]>([]);
   const [noEvidence, setNoEvidence] = useState("");
   const [goals, setGoals] = useState<string[]>([]);
+  const [hours, setHours] = useState<number | null>(8);
+  const [away, setAway] = useState<number | null>(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const checkId = useRef(0);
@@ -119,13 +124,17 @@ export default function Interview({ meta, questions, onSave, onUseForm }: {
   const save = () =>
     guard(async () => {
       const areas = Object.keys(levels);
-      const r = await api.interpret(name.trim(), { areas, levels, months, goals, open: "" });
+      const r = await api.interpret(name.trim(), {
+        areas, levels, months, goals, open: "", weekly_hours: hours, unavailable_weeks: away,
+      });
       onSave(r.profile);
     });
 
   const asked = history.filter((m) => m.role === "assistant").length;
   const kept = draft.filter((d) => d.skill in levels);
   const general = warnings.filter((w) => !w.skill);
+  const hoursOk = validNumber(hours, hoursQ?.min ?? 0, hoursQ?.max ?? 40)
+    && validNumber(away, awayQ?.min ?? 0, awayQ?.max ?? 12, true);
 
   return (
     <div className="interview">
@@ -264,12 +273,26 @@ export default function Interview({ meta, questions, onSave, onUseForm }: {
               <p className="muted small">Pode pular se não tiver preferência.</p>
             </div>
           )}
+          {hoursQ && (
+            <div className="q">
+              <label htmlFor="iv-hours" className="qtext">{hoursQ.text}</label>
+              <NumberField id="iv-hours" value={hours} onChange={setHours} min={hoursQ.min ?? 0} max={hoursQ.max ?? 40}
+                step={hoursQ.step} unit={hoursQ.unit} suggestions={hoursQ.suggestions} />
+            </div>
+          )}
+          {awayQ && (
+            <div className="q">
+              <label htmlFor="iv-away" className="qtext">{awayQ.text}</label>
+              <NumberField id="iv-away" value={away} onChange={setAway} min={awayQ.min ?? 0} max={awayQ.max ?? 12}
+                step={awayQ.step} unit={awayQ.unit} />
+            </div>
+          )}
           <p className="muted small">
             Os avisos não impedem nada: se o nível estiver certo, salve mesmo assim. Ao salvar, você concorda em usar
             esses dados para montar squads.
           </p>
           <div className="row">
-            <button className="primary" disabled={busy || kept.length === 0} onClick={save}>Salvar perfil</button>
+            <button className="primary" disabled={busy || kept.length === 0 || !hoursOk} onClick={save}>Salvar perfil</button>
           </div>
         </div>
       )}

@@ -309,3 +309,26 @@ body:has(.detail) .shell { padding-top: 36px; }
 .warn-box { margin: 10px 0 0; padding: 10px 14px; background: var(--warn-soft); border: 1px solid rgba(242, 184, 75, 0.35); border-radius: 12px; color: var(--ink-2); font-size: 0.88rem; line-height: 1.45; }
 .warn-tag { display: inline-block; margin-right: 6px; padding: 1px 8px; border-radius: 999px; background: var(--warn); color: #000; font-size: 0.72rem; font-weight: 700; }
 .interview .link { margin-top: 14px; }
+
+/* Disponibilidade real de horas */
+.hours-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 0.82rem; color: var(--ink-2); }
+.hours-line strong { color: var(--ink); font-weight: 600; }
+.short-tag { padding: 1px 8px; border-radius: 999px; background: var(--bad-soft); color: var(--bad); font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.person-stack { display: grid; gap: 6px; }
+.short-summary { margin-top: 10px; font-size: 0.82rem; color: var(--bad); font-weight: 600; }
+.number-field { display: grid; gap: 10px; }
+.number-row { display: flex; align-items: center; gap: 10px; }
+.number-row input { max-width: 120px; }
+.weeks-field { display: grid; gap: 8px; }
+.weeks-field .chips { gap: 6px; }
+.weeks-field .chip { padding: 4px 12px; }
+.team { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.team summary { cursor: pointer; font-weight: 600; font-size: 1.02rem; }
+.team summary::marker { color: var(--accent); }
+.team .declared { margin-top: 8px; }
+.team table { margin-top: 12px; }
+.team td input { max-width: 96px; padding: 6px 10px; }
+.team tr.changed td { background: var(--accent-soft); }
+.source { font-size: 0.72rem; color: var(--muted); }
+.hours-note { margin-top: 6px; }
+.load-help { margin: 4px 0 0; }

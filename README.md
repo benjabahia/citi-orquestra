@@ -56,6 +56,7 @@ O CITi Orquestra transforma essa decisão em algo visível e comparável. A regr
 | 10 | [Importar planilha](#10-importar-planilha-de-membros) | Use os membros reais do seu time em vez dos dados de exemplo |
 | 11 | [Projetos prontos](#11-projetos-prontos-e-o-projeto-armadilha) | 6 exemplos, incluindo um "armadilha" que mostra o risco aparecendo |
 | 12 | [IA real ou simulada](#12-ia-real-ou-simulada-sempre-visível) | O modo ativo aparece na tela; sem IA, tudo continua funcionando |
+| 13 | [Disponibilidade real de horas](#13-disponibilidade-real-de-horas) | Horas livres declaradas pelos membros, ajustáveis pelo gerente e comparadas com as exigidas |
 
 ### 1. Três squads por projeto
 
@@ -141,11 +142,12 @@ Proteções: o texto da pessoa é tratado como dado, nunca como instrução (um 
 
 Em projetos criados por briefing, o gerente pode usar **o seu próprio time**:
 
-- **Baixar modelo** gera um CSV de exemplo com as colunas `nome`, `meses_no_citi`, as 8 habilidades (níveis de 0 a 4) e `metas`.
-- **Importar planilha (CSV)** valida o arquivo e mostra **todos os erros de uma vez**, cada um com linha e coluna (nível fora de 0 a 4, habilidade desconhecida, nome vazio ou repetido, coluna faltando, menos de 3 pessoas, mais de 200 linhas).
+- **Baixar modelo** gera um CSV de exemplo com as colunas `nome`, `meses_no_citi`, as 8 habilidades (níveis de 0 a 4), `metas` e as duas colunas **opcionais** de disponibilidade: `horas_livres_por_semana` (número de 0 a 40, aceita decimal como 7.5) e `semanas_fora` (inteiro de 0 a 12).
+- Arquivos antigos, sem as colunas de disponibilidade, continuam funcionando: cada pessoa entra com 8 h por semana e 0 semanas fora. Célula vazia nessas colunas também vale o padrão.
+- **Importar planilha (CSV)** valida o arquivo e mostra **todos os erros de uma vez**, cada um com linha e coluna (nível fora de 0 a 4, habilidade desconhecida, nome vazio ou repetido, coluna faltando, menos de 3 pessoas, mais de 200 linhas; nas horas: valor negativo, texto no lugar de número, acima do limite e decimal em `semanas_fora`).
 - Aceita separador vírgula (o modelo) e ponto e vírgula (o Excel em português).
 - Com a planilha ativa, aparece o aviso **"Usando N membros da sua planilha"** e as squads, trocas e o teste de estresse usam só essas pessoas. **Voltar aos dados de exemplo** desfaz.
-- Cada pessoa importada entra com 8 horas por semana, porque a planilha não traz disponibilidade.
+- As horas da planilha entram no cálculo (ver [funcionalidade 13](#13-disponibilidade-real-de-horas)).
 - **Privacidade:** a planilha fica só no navegador (localStorage). Vai junto no pedido para o cálculo, mas nada é gravado no servidor.
 
 Os projetos prontos continuam usando os dados de exemplo.
@@ -159,6 +161,28 @@ O de **pagamentos** é uma armadilha de propósito: só uma pessoa domina back-e
 ### 12. IA real ou simulada, sempre visível
 
 Um selo no topo mostra se a IA está **ativa** ou em **modo simulado**. Sem chave de IA, o briefing e o perfil usam regras simples (palavras-chave), a entrevista dá lugar ao formulário, e todo o resto (squads, medidores, mentoria, trocas, recomendação, teste de estresse) funciona igual, porque nada disso depende da IA. Se a IA falhar ou demorar mais de 15 segundos, o sistema volta sozinho ao modo simulado, sem quebrar.
+
+### 13. Disponibilidade real de horas
+
+Em projetos criados por briefing, as horas livres de cada pessoa vêm do que foi **informado**, e não de um valor inventado pelo código.
+
+**De onde vêm as horas (a última vence):**
+1. **Perfil do membro:** o formulário e o último passo da entrevista com IA perguntam "Quantas horas por semana você consegue dedicar a projetos neste ciclo?" (0 a 40, com atalhos 2, 4, 6, 8, 10 e 12) e "Em quantas semanas dos próximos projetos você estará fora?" (inteiro de 0 a 12). Os valores ficam salvos no perfil (`weekly_hours` e `unavailable_weeks`). Perfis antigos, sem esses campos, continuam válidos com 8 h e 0 semanas.
+2. **Planilha:** as colunas opcionais `horas_livres_por_semana` e `semanas_fora` (sem elas, 8 h e 0 semanas).
+3. **Ajuste do gerente:** no passo "2. Confira os papéis", a seção recolhível **Ajustar disponibilidade da equipe** lista cada pessoa em jogo, já preenchida com o que veio da planilha ou do perfil, e permite mudar as horas e as semanas fora. Os ajustes valem ao montar as squads.
+
+**Regras do cálculo:**
+- Horas livres no projeto = horas por semana × (semanas do projeto − semanas fora) ÷ semanas do projeto. Exemplo: 8 h num projeto de 2 semanas, com 1 semana fora, dá 4 h (50%).
+- Horas exigidas = horas do papel + 2 h por semana para cada pessoa que ela mentora.
+- Quando as exigidas passam das livres, a pessoa conta como **sobrecarregada** no risco, como antes.
+- A disponibilidade viaja junto com o projeto em todos os pedidos (trocar, aplicar troca e teste de estresse), então os números são iguais em todas as telas.
+- Sem planilha, os 24 membros de exemplo continuam com as horas de exemplo (fictícias), mas o gerente também pode ajustá-las.
+- **Os 6 projetos prontos não mudam:** continuam com as horas simuladas, e a tela mostra "Horas de exemplo (fictícias)". Um teste compara o resultado deles com uma cópia salva antes desta mudança.
+
+**Na tela:**
+- Ao lado do campo **Duração (semanas)**, atalhos de 2, 4, 6, 8 e 12 semanas (o campo continua editável).
+- Na tabela comparativa e na tela de detalhes, cada pessoa mostra "4 h livres · 6 h exigidas". Quando faltam horas, aparece uma etiqueta vermelha suave "faltam 2 h", e o cartão da squad mostra um resumo como "2 pessoas sem horas suficientes".
+- Texto fixo: "Disponibilidade declarada pelos membros; o sistema não verifica as horas."
 
 ---
 
@@ -232,7 +256,7 @@ npm run build
 
 ## Testes
 
-Mais de **80 testes automatizados**, todos passando, que rodam sem internet e sem chave de IA:
+**169 testes automatizados**, todos passando, que rodam sem internet e sem chave de IA:
 
 ```
 cd backend
@@ -248,6 +272,7 @@ python -m pytest -q
 | Recomendação | recomendação esperada nos 6 projetos para cada prioridade; números citados corretos; empate; trava de risco |
 | Teste de estresse | pessoa única de habilidade crítica aparece como mais frágil; cobre todos os membros; funciona em projeto por briefing |
 | Importar planilha | arquivo válido; cada tipo de erro (nível, nome repetido ou vazio, habilidade, poucos membros, limite de linhas); projetos prontos não mudam |
+| Disponibilidade de horas | perfil com e sem os campos novos; CSV com e sem as colunas novas e cada erro de horas (negativo, texto, acima do limite, decimal em semanas); horas informadas entram no cálculo; sobrecarga quando faltam horas; ajuste do gerente; troca, aplicar troca e teste de estresse com as mesmas horas; 2 semanas com 1 fora = 50%; os 6 projetos prontos idênticos aos de antes |
 
 Além dos testes automáticos, o site foi percorrido de ponta a ponta no navegador a cada mudança visual.
 
@@ -277,11 +302,12 @@ backend/
     whatif.py          trocas e remoções
     recommend.py       recomendação por prioridade
     stress.py          teste de estresse
-    members_csv.py     leitura e validação da planilha
+    members_csv.py     leitura e validação da planilha (inclui as horas)
     data.py            membros e projetos de exemplo
     api.py             endpoints FastAPI
     ai/                briefing, entrevista, perfil e adaptador do Groq
   tests/               testes automatizados
+    dados/             CSVs de teste e a cópia do resultado dos 6 projetos prontos
 frontend/
   src/                 telas e componentes React
   dist/                site construído, servido pela API
@@ -296,7 +322,8 @@ AI_LOG.md              diário de uso de IA no desenvolvimento
 
 **Limites**
 - Os 24 membros e 6 projetos de exemplo são fictícios.
-- A planilha importada vale só para projetos criados por briefing, e cada pessoa entra com 8 h por semana.
+- A planilha importada vale só para projetos criados por briefing.
+- A planilha e o perfil agora trazem as horas livres, mas elas são **declaradas** pela pessoa (ou ajustadas pelo gerente) e o sistema **não verifica** se são reais. Quem não informa entra com 8 h por semana.
 - O perfil do membro fica só no navegador (localStorage).
 - "Balanceada com exatamente 1 novato", "Evolutiva com pelo menos 2" e o peso 1,5 dos papéis críticos são **escolhas de produto**, ajustáveis em `config.py`.
 - No plano gratuito, o primeiro acesso após muito tempo parado pode levar cerca de 1 minuto; o monitor reduz isso.

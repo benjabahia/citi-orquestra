@@ -3,7 +3,8 @@ import { api } from "./api";
 import ImportSheet, { loadSheet, saveSheet } from "./ImportSheet";
 import SquadBoard from "./SquadBoard";
 import SquadDetail from "./SquadDetail";
-import type { CustomBody, Meta, Mode, Priority, Profile, Project, Role, Squad, SquadsResponse } from "./types";
+import type { CustomBody, Hours, Meta, Mode, Priority, Profile, Project, Role, Squad, SquadsResponse, TeamMember } from "./types";
+import { num, validNumber } from "./ui";
 
 export const STORAGE_KEY = "citi-orquestra-membros";
 
@@ -14,6 +15,12 @@ export function loadSavedMembers(): Profile[] {
     return [];
   }
 }
+
+const WEEK_CHIPS = [2, 4, 6, 8, 12];
+const SOURCE_LABEL: Record<TeamMember["source"], string> = {
+  planilha: "planilha", perfil: "perfil do membro", exemplo: "exemplo (fictício)",
+};
+export const DECLARED_NOTE = "Disponibilidade declarada pelos membros; o sistema não verifica as horas.";
 
 const EXAMPLE_BRIEFING =
   "App web para uma clínica de fisioterapia: agendamento online com login, API de integração " +
@@ -38,13 +45,56 @@ export default function Manager({ meta }: { meta: Meta }) {
   const resultRef = useRef<HTMLElement>(null);
   const saved = loadSavedMembers();
   const [sheet, setSheet] = useState<Profile[] | null>(loadSheet);
+  // Equipe em jogo (com as horas declaradas) e os ajustes que o gerente fez por cima.
+  const [team, setTeam] = useState<TeamMember[] | null>(null);
+  const [overrides, setOverrides] = useState<Record<string, Hours>>({});
+  const savedKey = JSON.stringify(saved);
 
   // Trocar ou remover a planilha invalida o resultado que está na tela (ele usava a equipe antiga).
   const changeSheet = (members: Profile[] | null) => {
     saveSheet(members);
     setSheet(members);
+    setOverrides({}); // os ajustes eram para a equipe antiga
     if (custom) { setResult(null); setDetail(null); setCustom(null); setPriority(null); }
   };
+
+  /** O projeto por briefing como o servidor espera (sem os ajustes de horas). */
+  const baseBody = (): CustomBody | null => {
+    if (!roles) return null;
+    return {
+      name: name.trim().length >= 2 ? name.trim() : "Projeto novo",
+      description: briefing.slice(0, 300),
+      duration_weeks: weeks,
+      roles: roles.map(({ skill, min_level, hours_per_week, critical }) => ({
+        skill, min_level, hours_per_week, critical,
+      })),
+      extra_members: saved,
+      replace_members: sheet,
+    };
+  };
+
+  // Busca quem está em jogo e as horas declaradas. As horas de exemplo dependem do nome e da duração.
+  useEffect(() => {
+    const body = baseBody();
+    if (!body || !validNumber(weeks, 1, 26, true)) return;
+    const timer = setTimeout(() => {
+      api.team(body).then((r) => setTeam(r.members)).catch(() => setTeam(null));
+    }, 300);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roles !== null, name, weeks, sheet, savedKey]);
+
+  const hoursOf = (m: TeamMember): Hours =>
+    overrides[m.id] ?? { weekly_hours: m.weekly_hours, unavailable_weeks: m.unavailable_weeks };
+  const setHours = (m: TeamMember, patch: Partial<Hours>) =>
+    setOverrides((o) => ({ ...o, [m.id]: { ...hoursOf(m), ...patch } }));
+  // Só vão para o servidor os ajustes que mudam algo.
+  const changed = (team ?? []).filter((m) => {
+    const h = overrides[m.id];
+    return h && (h.weekly_hours !== m.weekly_hours || h.unavailable_weeks !== m.unavailable_weeks);
+  });
+  const invalidHours = changed.some((m) =>
+    !validNumber(overrides[m.id].weekly_hours, 0, 40) || !validNumber(overrides[m.id].unavailable_weeks, 0, 12, true));
 
   // Leva a tela até o que acabou de aparecer (antes o resultado ficava fora da vista).
   const reduceMotion =
@@ -84,6 +134,7 @@ export default function Manager({ meta }: { meta: Meta }) {
     run(async () => {
       const r = await api.parseBriefing(briefing);
       setRoles(r.roles);
+      setOverrides({});
       if (r.name && !name.trim()) setName(r.name);
       setWeeks(r.duration_weeks);
       setParseMode(r.mode);
@@ -93,16 +144,12 @@ export default function Manager({ meta }: { meta: Meta }) {
 
   const build = () =>
     run(async () => {
-      if (!roles) return;
+      const base = baseBody();
+      if (!base) return;
+      // A disponibilidade ajustada viaja no corpo "custom": troca, aplicar e teste de estresse usam a mesma.
       const body: CustomBody = {
-        name: name.trim() || "Projeto novo",
-        description: briefing.slice(0, 300),
-        duration_weeks: weeks,
-        roles: roles.map(({ skill, min_level, hours_per_week, critical }) => ({
-          skill, min_level, hours_per_week, critical,
-        })),
-        extra_members: saved,
-        replace_members: sheet,
+        ...base,
+        availability: Object.fromEntries(changed.map((m) => [m.id, overrides[m.id]])),
       };
       setCustom(body);
       setDetail(null);
@@ -185,9 +232,17 @@ export default function Manager({ meta }: { meta: Meta }) {
               <label htmlFor="pname">Nome do projeto</label>
               <input id="pname" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: App da clínica" />
             </div>
-            <div>
+            <div className="weeks-field">
               <label htmlFor="weeks">Duração (semanas)</label>
               <input id="weeks" type="number" min={1} max={26} value={weeks} onChange={(e) => setWeeks(Number(e.target.value))} />
+              <div className="chips" role="group" aria-label="Duração rápida">
+                {WEEK_CHIPS.map((w) => (
+                  <button key={w} type="button" className={`chip ${weeks === w ? "on" : ""}`} aria-pressed={weeks === w}
+                    onClick={() => setWeeks(w)}>
+                    {w} sem.
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <table className="roles">
@@ -239,9 +294,70 @@ export default function Manager({ meta }: { meta: Meta }) {
           </table>
           <div className="row">
             <button className="ghost" disabled={roles.length >= 6} onClick={addRole}>Adicionar papel</button>
-            <button className="primary" disabled={busy} onClick={build}>{busy ? "Montando..." : "Montar squads"}</button>
+            <button className="primary" disabled={busy || invalidHours} onClick={build}>{busy ? "Montando..." : "Montar squads"}</button>
           </div>
+          {invalidHours && (
+            <p className="error small">Corrija as horas da equipe: de 0 a 40 h por semana e de 0 a 12 semanas fora (número inteiro).</p>
+          )}
           <ImportSheet members={sheet} onChange={changeSheet} />
+          {team && team.length > 0 && (
+            <details className="team">
+              <summary>Ajustar disponibilidade da equipe</summary>
+              <p className="muted small declared">{DECLARED_NOTE}</p>
+              <p className="muted small">
+                {sheet
+                  ? "Horas vindas da sua planilha (8 h e 0 semanas para quem não informou)."
+                  : "Sem planilha, os 24 membros de exemplo usam horas de exemplo (fictícias); quem respondeu o perfil usa o que declarou."}{" "}
+                As alterações valem ao montar as squads. A média é o que sobra por semana ao longo de {weeks} semana(s),
+                descontadas as semanas fora.
+              </p>
+              <div className="table-wrap">
+                <table className="people">
+                  <thead>
+                    <tr>
+                      <th>Pessoa</th><th>Horas livres por semana</th><th>Semanas fora</th>
+                      <th className="num">Média no projeto</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {team.map((m) => {
+                      const h = hoursOf(m);
+                      const avg = validNumber(weeks, 1, 26, true) && validNumber(h.weekly_hours, 0, 40)
+                        && validNumber(h.unavailable_weeks, 0, 12, true)
+                        ? (h.weekly_hours * Math.max(0, weeks - h.unavailable_weeks)) / weeks : null;
+                      return (
+                        <tr key={m.id} className={changed.includes(m) ? "changed" : ""}>
+                          <td>
+                            {m.name}{m.is_novato && <span className="tag">novato</span>}
+                            <span className="source block">{SOURCE_LABEL[m.source]}</span>
+                          </td>
+                          <td>
+                            <input type="number" min={0} max={40} step={0.5}
+                              value={Number.isNaN(h.weekly_hours) ? "" : h.weekly_hours}
+                              aria-label={`Horas livres por semana de ${m.name}`}
+                              onChange={(e) => setHours(m, { weekly_hours: e.target.value === "" ? NaN : Number(e.target.value) })} />
+                          </td>
+                          <td>
+                            <input type="number" min={0} max={12} step={1}
+                              value={Number.isNaN(h.unavailable_weeks) ? "" : h.unavailable_weeks}
+                              aria-label={`Semanas fora de ${m.name}`}
+                              onChange={(e) => setHours(m, { unavailable_weeks: e.target.value === "" ? NaN : Number(e.target.value) })} />
+                          </td>
+                          <td className="num">{avg === null ? "—" : `${num(avg)} h`}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {changed.length > 0 && (
+                <div className="row">
+                  <span className="muted small">{changed.length} pessoa(s) com horas ajustadas.</span>
+                  <button className="btn" onClick={() => setOverrides({})}>Desfazer ajustes</button>
+                </div>
+              )}
+            </details>
+          )}
           {saved.length > 0 && (
             <p className="muted small">
               {saved.length} membro(s) que responderam o chat entram no sorteio: {saved.map((m) => m.name).join(", ")}.
@@ -258,6 +374,7 @@ export default function Manager({ meta }: { meta: Meta }) {
               {result.project.duration_weeks} semanas · {result.project.roles.length} papéis. Compare as três
               opções e abra os detalhes da que preferir.
             </p>
+            <p className="muted small hours-note">{custom ? DECLARED_NOTE : "Horas de exemplo (fictícias)."}</p>
           </div>
           <SquadBoard
             data={result}

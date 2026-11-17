@@ -1,4 +1,4 @@
-import { Bar, LevelBar, riskTone } from "./ui";
+import { Bar, HOURS_HELP, HoursLine, LevelBar, riskTone, shortOfHours } from "./ui";
 import type { Priority, Squad, SquadsResponse } from "./types";
 
 type Key = Squad["profile"];
@@ -43,6 +43,7 @@ export default function SquadBoard({ data, onDetail, priority, onPriority }: {
         </button>
       ))}
     </div>
+    <p className="muted small load-help">{HOURS_HELP}</p>
     <p className="sr" aria-live="polite">
       {rec ? `Recomendada: squad ${PROFILES.find((p) => p.key === rec.profile)?.title}. ${rec.reason}` : ""}
     </p>
@@ -58,6 +59,14 @@ export default function SquadBoard({ data, onDetail, priority, onPriority }: {
                 <div className="col-title">{p.title}</div>
                 <div className="muted small">{p.text}</div>
                 {rec?.profile === p.key && <p className="rec-reason">{rec.reason}</p>}
+                {(() => {
+                  const n = shortOfHours(data.squads[p.key].metrics.loads);
+                  return n > 0 && (
+                    <p className="short-summary">
+                      {n === 1 ? "1 pessoa sem horas suficientes" : `${n} pessoas sem horas suficientes`}
+                    </p>
+                  );
+                })()}
                 <button className="btn" onClick={() => onDetail(p.key)}>Ver detalhes</button>
               </th>
             ))}
@@ -93,15 +102,19 @@ export default function SquadBoard({ data, onDetail, priority, onPriority }: {
               </th>
               {PROFILES.map((p) => {
                 const slot = data.squads[p.key].slots[role.index!];
+                const load = data.squads[p.key].metrics.loads.find((l) => l.member_id === slot.member_id);
                 return (
                   <td key={p.key} className={col(p.key)}>
                     {slot.member_id ? (
-                      <div className="person-cell">
-                        <span>
-                          {slot.member_name}
-                          {slot.is_novato && <span className="tag">novato</span>}
-                        </span>
-                        <LevelBar level={slot.member_level ?? 0} need={slot.min_level} />
+                      <div className="person-stack">
+                        <div className="person-cell">
+                          <span>
+                            {slot.member_name}
+                            {slot.is_novato && <span className="tag">novato</span>}
+                          </span>
+                          <LevelBar level={slot.member_level ?? 0} need={slot.min_level} />
+                        </div>
+                        {load && <HoursLine free={load.capacity} needed={load.demand} />}
                       </div>
                     ) : (
                       <span className="gap">Vaga em aberto</span>
