@@ -91,3 +91,23 @@ PROFILE_WEIGHTS = {
     "evolutiva": ProfileWeights(entrega=0.30, crescimento=0.45, risco=0.25),
     "balanceada": ProfileWeights(entrega=0.40, crescimento=0.35, risco=0.25),
 }
+
+PROFILE_TITLES = {"segura": "Segura", "evolutiva": "Evolutiva", "balanceada": "Balanceada"}
+
+
+# --- Recomendação por prioridade (recommend.py) ---
+# Aqui o peso do risco vale para "100 - risco" (risco baixo soma pontos).
+PRIORITY_WEIGHTS = {
+    "prazo": ProfileWeights(entrega=0.50, crescimento=0.0, risco=0.50),
+    "formar": ProfileWeights(entrega=0.15, crescimento=0.70, risco=0.15),
+    "equilibrio": ProfileWeights(entrega=1 / 3, crescimento=1 / 3, risco=1 / 3),
+}
+
+
+@dataclass(frozen=True)
+class RecommendConfig:
+    # Em "prazo apertado", squad com risco mais de 15 pontos acima do menor risco não é recomendada.
+    prazo_max_risk_gap: float = 15.0
+
+
+RECOMMEND_CONFIG = RecommendConfig()

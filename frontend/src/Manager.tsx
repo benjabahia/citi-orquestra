@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
 import SquadBoard from "./SquadBoard";
 import SquadDetail from "./SquadDetail";
-import type { CustomBody, Meta, Mode, Profile, Project, Role, Squad, SquadsResponse } from "./types";
+import type { CustomBody, Meta, Mode, Priority, Profile, Project, Role, Squad, SquadsResponse } from "./types";
 
 export const STORAGE_KEY = "citi-orquestra-membros";
 
@@ -32,6 +32,7 @@ export default function Manager({ meta }: { meta: Meta }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [custom, setCustom] = useState<CustomBody | null>(null);
   const [detail, setDetail] = useState<Squad["profile"] | null>(null);
+  const [priority, setPriority] = useState<Priority | null>(null);
   const rolesRef = useRef<HTMLElement>(null);
   const resultRef = useRef<HTMLElement>(null);
   const saved = loadSavedMembers();
@@ -66,6 +67,7 @@ export default function Manager({ meta }: { meta: Meta }) {
       setOpenId(id);
       setCustom(null);
       setDetail(null);
+      setPriority(null);
       setResult(await api.squads(id));
     });
 
@@ -94,6 +96,7 @@ export default function Manager({ meta }: { meta: Meta }) {
       };
       setCustom(body);
       setDetail(null);
+      setPriority(null);
       setResult(await api.buildCustom(body));
     });
 
@@ -245,7 +248,12 @@ export default function Manager({ meta }: { meta: Meta }) {
               opções e abra os detalhes da que preferir.
             </p>
           </div>
-          <SquadBoard data={result} onDetail={(p) => { setDetail(p); window.scrollTo({ top: 0 }); }} />
+          <SquadBoard
+            data={result}
+            priority={priority}
+            onPriority={setPriority}
+            onDetail={(p) => { setDetail(p); window.scrollTo({ top: 0 }); }}
+          />
         </section>
       )}
     </div>

@@ -1,5 +1,5 @@
 import { Bar, LevelBar, riskTone } from "./ui";
-import type { Squad, SquadsResponse } from "./types";
+import type { Priority, Squad, SquadsResponse } from "./types";
 
 type Key = Squad["profile"];
 
@@ -15,10 +15,37 @@ const METERS: { id: "entrega" | "crescimento" | "risco"; label: string; hint: st
   { id: "risco", label: "Risco", hint: "quanto menor, melhor" },
 ];
 
+const PRIORITIES: { key: Priority; label: string }[] = [
+  { key: "prazo", label: "Prazo apertado" },
+  { key: "formar", label: "Formar gente" },
+  { key: "equilibrio", label: "Equilíbrio" },
+];
+
 /** Tabela comparativa: as três squads lado a lado, com as linhas alinhadas por papel. */
-export default function SquadBoard({ data, onDetail }: { data: SquadsResponse; onDetail: (p: Key) => void }) {
+export default function SquadBoard({ data, onDetail, priority, onPriority }: {
+  data: SquadsResponse;
+  onDetail: (p: Key) => void;
+  priority: Priority | null;
+  onPriority: (p: Priority | null) => void;
+}) {
   const roles = data.project.roles;
+  const rec = priority ? data.recommendations?.[priority] : undefined;
+  // Marca a coluna da squad recomendada (cabeçalho e células).
+  const col = (key: Key) => (rec?.profile === key ? "rec" : undefined);
   return (
+    <>
+    <div className="priority" role="group" aria-label="Recomendação por prioridade">
+      <span className="muted small">Qual é a prioridade deste projeto?</span>
+      {PRIORITIES.map((p) => (
+        <button key={p.key} className={`chip ${priority === p.key ? "on" : ""}`} aria-pressed={priority === p.key}
+          onClick={() => onPriority(priority === p.key ? null : p.key)}>
+          {p.label}
+        </button>
+      ))}
+    </div>
+    <p className="sr" aria-live="polite">
+      {rec ? `Recomendada: squad ${PROFILES.find((p) => p.key === rec.profile)?.title}. ${rec.reason}` : ""}
+    </p>
     <div className="table-wrap">
       <table className="compare">
         <caption className="sr">Comparação das três opções de squad para {data.project.name}</caption>
@@ -26,9 +53,11 @@ export default function SquadBoard({ data, onDetail }: { data: SquadsResponse; o
           <tr>
             <td />
             {PROFILES.map((p) => (
-              <th key={p.key} scope="col">
+              <th key={p.key} scope="col" className={col(p.key)}>
+                {rec?.profile === p.key && <span className="badge">Recomendada</span>}
                 <div className="col-title">{p.title}</div>
                 <div className="muted small">{p.text}</div>
+                {rec?.profile === p.key && <p className="rec-reason">{rec.reason}</p>}
                 <button className="btn" onClick={() => onDetail(p.key)}>Ver detalhes</button>
               </th>
             ))}
@@ -45,7 +74,7 @@ export default function SquadBoard({ data, onDetail }: { data: SquadsResponse; o
                   <span className="muted small block">{m.hint}</span>
                 </th>
                 {PROFILES.map((p, i) => (
-                  <td key={p.key}>
+                  <td key={p.key} className={col(p.key)}>
                     <div className="meter-cell">
                       <strong className={values[i] === best ? "best" : ""}>{Math.round(values[i])}</strong>
                       <Bar value={values[i]} tone={m.id === "risco" ? riskTone(values[i]) : "ok"} />
@@ -65,7 +94,7 @@ export default function SquadBoard({ data, onDetail }: { data: SquadsResponse; o
               {PROFILES.map((p) => {
                 const slot = data.squads[p.key].slots[role.index!];
                 return (
-                  <td key={p.key}>
+                  <td key={p.key} className={col(p.key)}>
                     {slot.member_id ? (
                       <div className="person-cell">
                         <span>
@@ -89,7 +118,7 @@ export default function SquadBoard({ data, onDetail }: { data: SquadsResponse; o
               const sq = data.squads[p.key];
               const name = (id: string) => sq.slots.find((s) => s.member_id === id)?.member_name;
               return (
-                <td key={p.key}>
+                <td key={p.key} className={col(p.key)}>
                   {sq.metrics.mentorships.length === 0 ? (
                     <span className="muted">Não precisa</span>
                   ) : (
@@ -105,7 +134,7 @@ export default function SquadBoard({ data, onDetail }: { data: SquadsResponse; o
             {PROFILES.map((p) => {
               const f = data.squads[p.key].metrics.factors;
               return (
-                <td key={p.key}>
+                <td key={p.key} className={col(p.key)}>
                   {f.length === 0 ? (
                     <span className="muted">Nenhum</span>
                   ) : (
@@ -118,5 +147,6 @@ export default function SquadBoard({ data, onDetail }: { data: SquadsResponse; o
         </tbody>
       </table>
     </div>
+    </>
   );
 }

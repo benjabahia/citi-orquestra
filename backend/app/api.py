@@ -23,6 +23,7 @@ from .ai import llm
 from .ai import profile_chat
 from .data import default_availability, load_scenario
 from .models import Member, Project, Role
+from .recommend import recommend_all
 from .serializers import (
     member_dict,
     project_dict,
@@ -143,6 +144,13 @@ def _rebuild(project, state: SquadState, members, availability):
     return _squad_from(project, state.profile, state.assignments, members, availability, CFG)
 
 
+def _squads_payload(project, built, members):
+    """Resposta das 3 squads + a recomendação para cada prioridade (prazo, formar, equilíbrio)."""
+    squads = {p: squad_dict(built[p], project, members, CFG) for p in PROFILES}
+    metrics = {p: squads[p]["metrics"] for p in PROFILES}
+    return {"project": project_dict(project), "squads": squads, "recommendations": recommend_all(metrics)}
+
+
 def _check_role(project, role_index: int):
     if not 0 <= role_index < len(project.roles):
         raise HTTPException(422, "Papel inexistente.")
@@ -176,11 +184,7 @@ def members():
 @app.get("/api/projects/{project_id}/squads")
 def squads(project_id: str):
     project = _project_or_404(project_id)
-    built = _squads_for(project_id)
-    return {
-        "project": project_dict(project),
-        "squads": {p: squad_dict(built[p], project, MEMBERS, CFG) for p in PROFILES},
-    }
+    return _squads_payload(project, _squads_for(project_id), MEMBERS)
 
 
 @app.post("/api/projects/{project_id}/whatif")
@@ -234,11 +238,7 @@ def parse_briefing(req: BriefingRequest):
 def build_custom(req: CustomProjectRequest):
     """Monta as 3 squads para um projeto novo (papéis vindos do briefing, já editados)."""
     project, members, availability = _custom_context(req)
-    built = build_squads(project, members, availability, CFG)
-    return {
-        "project": project_dict(project),
-        "squads": {p: squad_dict(built[p], project, members, CFG) for p in PROFILES},
-    }
+    return _squads_payload(project, build_squads(project, members, availability, CFG), members)
 
 
 @app.get("/api/profile/questions")

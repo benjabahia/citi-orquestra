@@ -79,9 +79,19 @@ export interface Project {
   roles: Role[];
 }
 
+export type Priority = "prazo" | "formar" | "equilibrio";
+
+export interface Recommendation {
+  priority: Priority;
+  profile: Squad["profile"];
+  reason: string;
+  scores: Partial<Record<Squad["profile"], number>>;
+}
+
 export interface SquadsResponse {
   project: Project;
   squads: Record<Squad["profile"], Squad>;
+  recommendations: Record<Priority, Recommendation>;
 }
 
 export interface Meta {
