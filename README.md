@@ -9,7 +9,7 @@
 Ferramenta interna do CITi que monta **3 squads por projeto** (Seguro, Evolutivo e Balanceado) a partir das habilidades e da disponibilidade dos membros, recomenda um deles conforme a prioridade do gerente e mostra o impacto de cada decisão (trocar uma pessoa, alguém sair) **antes** de ela ser tomada.
 
 **Site no ar:** https://citi-orquestra.onrender.com
-**Vídeo de apresentação:** (link do YouTube a preencher)
+**Vídeo de apresentação:** https://youtu.be/JCFr0tKrP-4
 **Diário de uso de IA:** [AI_LOG.md](AI_LOG.md)
 
 ---
