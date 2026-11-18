@@ -33,6 +33,7 @@ Como a IA foi usada para construir o CITi Orquestra: o que ela propôs, o que eu
 | Ter 17/11 | Disponibilidade real de horas (Claude Code) | Horas no perfil e na planilha, ajuste do gerente, "h livres · h exigidas" nas telas, 29 testes novos e uma cópia do resultado dos projetos prontos para provar que não mudaram | Defini as regras e os testes; a revisar no navegador |
 | Ter 17/11 | Exportar PDF e resumo (Claude Code) | Botão "Baixar PDF" com relatório A4 próprio para impressão, botão "Copiar resumo" e texto montado no servidor (`summary.py`), 17 testes novos | A revisar no navegador (impressão em PDF) |
 | Ter 17/11 | Corrigir a escada de crescimento em projetos por briefing (Claude Code) | Diagnóstico papel por papel do caso FisioAgenda, checagem final da escada no `allocator.py` e 92 testes novos (caso exato + varreduras com briefings sorteados) | Apontei o defeito ao gravar o vídeo e defini as regras e os testes; a revisar no navegador |
+| Qua 18/11 | Seção "Do protótipo ao uso real" no README | Brainstorm do conteúdo com o Claude | Texto revisado por mim |
 
 ## Onde a IA errou e como foi corrigido
 

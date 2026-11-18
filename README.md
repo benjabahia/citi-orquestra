@@ -25,7 +25,8 @@ Ferramenta interna do CITi que monta **3 squads por projeto** (Seguro, Evolutivo
 7. [Testes](#testes)
 8. [Publicação](#publicação)
 9. [Estrutura do repositório](#estrutura-do-repositório)
-10. [Limites conhecidos](#limites-conhecidos)
+10. [Do protótipo ao uso real](#do-protótipo-ao-uso-real)
+11. [Limites conhecidos](#limites-conhecidos)
 
 ---
 
@@ -340,6 +341,25 @@ scripts/               demonstração no terminal (demo_cli.py)
 assets/                logo
 AI_LOG.md              diário de uso de IA no desenvolvimento
 ```
+
+---
+
+## Do protótipo ao uso real
+
+O CITi Orquestra é um protótipo: o motor de alocação, a IA com alternativa simulada, a importação de planilha e a exportação já funcionam e estão cobertos por testes. Para o CITi usá-lo no dia a dia com os dados das suas pessoas, o que mudaria está na camada de dados, no acesso e na validação das regras, não no algoritmo.
+
+| Tema | Hoje (protótipo) | Numa adoção real |
+|---|---|---|
+| Dados dos membros | Os perfis (e a planilha importada) ficam no navegador de cada pessoa; o servidor não grava nada. Os 24 membros dos projetos de exemplo são fictícios | Banco persistente e compartilhado, com uma única base de membros. A carga inicial usaria a importação de planilha, que já existe |
+| Acesso | Não há login: quem tem o link abre tudo | Login com papéis: o gerente monta os squads; cada membro edita só o próprio perfil |
+| Privacidade | A entrevista com IA avisa que o texto vai ao Groq e não é guardado no servidor. O briefing não tem esse aviso | Definir quem vê o quê, o consentimento dos membros (LGPD) e o tempo de retenção; usar a chave de IA do próprio CITi |
+| Horas e níveis | Declarados pelo membro; o sistema não verifica | O gerente confirma os níveis, e as horas são revisadas a cada projeto |
+| Histórico | O squad escolhido não fica salvo entre sessões | Guardar o squad escolhido e os projetos, e comparar o planejado com o realizado para calibrar o algoritmo |
+| Regras e pesos | Pesos de entrega, crescimento e risco, limite de mentorados, horas de mentoria e regra de novato são hipóteses do projeto | Calibrar com o CITi em um piloto |
+| Hospedagem | Plano gratuito do Render, que pausa por inatividade (um monitor reduz isso) | Plano pago ou servidor próprio, com backup e monitoramento |
+| Integrações | Apenas importação de CSV | Opcional: ler a planilha direto de uma planilha online |
+
+O caminho natural é um piloto: rodar a alocação de um projeto real do CITi no Orquestra, ao lado do processo atual, e comparar o resultado.
 
 ---
 
